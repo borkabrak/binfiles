@@ -1,0 +1,20 @@
+#!/usr/bin/zsh
+#
+#   Commit and publish changes pulled down from tfs
+#
+#   Make sure:
+#       * no pending changes in $iis
+
+cd $tfs
+git commit -a -m"TFS Sync"
+
+cd $iis
+git pull
+
+echo "TFS:"
+cd $tfs
+git status
+
+echo "IIS:"
+cd $iis
+git status

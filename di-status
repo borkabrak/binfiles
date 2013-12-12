@@ -1,0 +1,11 @@
+#!/usr/bin/env zsh
+#
+#   Show status of local DITool git repos
+#
+#   If there's anything to commit, it can be done by running `di-publish`
+
+echo "━━━━━━━━━━ $tfs ━━━━━━━━━━"
+cd $tfs && git status
+
+echo "━━━━━━━━━━ $iis ━━━━━━━━━━"
+cd $iis && git status

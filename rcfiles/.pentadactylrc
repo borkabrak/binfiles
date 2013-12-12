@@ -1,0 +1,15 @@
+"1.0rc1
+
+loadplugins '\.(js|penta)$'
+group user
+
+""""""
+" Settings for pentadactyl, a firefox plugin to make it act a lot like vim.
+"   Yes, I agree it's sad.  :)
+""""""
+
+" Show address/search bar, basic buttons
+set guioptions+=mT
+
+" Don't let 'd' close the last tab
+set! browser.tabs.closeWindowWithLastTab=false

@@ -1,0 +1,28 @@
+#!/usr/bin/env ruby
+# Print the prime factors of a number
+
+x = ARGV[0].to_i
+lpf = 1
+factors = []
+(2..Math.sqrt(x)).each { |n|
+    if (x % n == 0) then
+        factors.push(n)
+        factors.push(x / n)
+        
+    end
+}
+
+print "#{x}: "
+factors.sort!
+factors.each { |factor|
+    prime = true
+    (2..Math.sqrt(factor)).each { |m|
+        if (factor % m == 0) then
+            prime = false
+        end
+    }
+    if (prime) then
+        print "#{factor} "
+    end
+}
+puts

@@ -1,0 +1,5 @@
+#!/usr/bin/env zsh
+#
+# Open vim on a file at a particular line.  Expect stdin to have grep-like output (^$file:$line.*)
+
+vim $1 "+$2" -c":match Search /$3/" 

@@ -1,0 +1,5 @@
+#!/usr/bin/zsh
+#
+# Look up thing in wikiquotes
+
+w3m "http://en.wikiquote.org/wiki/$*"

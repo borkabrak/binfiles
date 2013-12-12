@@ -1,0 +1,11 @@
+#!/usr/bin/env zsh
+#
+#   Randomize lines, and assign each line a random number
+
+if [ -e "$1" ]; then
+    filename=$1
+else
+    filename=/dev/stdin
+fi
+
+cat $filename  | shuf | cat -n | shuf

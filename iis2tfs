@@ -1,0 +1,16 @@
+#!/usr/bin/env zsh
+#
+#   Move changes from dev ($iis) to staging ($tfs) and sync repositories.
+#
+#   Do this after committing to the dev repository.
+
+cd "$tfs" && 
+
+git pull $iis && 
+
+cd "$iis" && 
+
+git pull && 
+
+# output status of both repos
+di-status

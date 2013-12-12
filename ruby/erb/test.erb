@@ -1,0 +1,6 @@
+<%= ship['name'] %>
+====
+
+<% ship['crew'].each do |person| %>
+    * <%= person['role'] %>: <%= person['name'] %>
+<% end %>

@@ -1,0 +1,32 @@
+#!/usr/bin/zsh
+#
+#   Commit and publish changes pulled down from tfs
+#
+#   USAGE:
+#       publish [commit message]
+#
+#       * message defaults to "TFS Sync"
+#
+#   Make sure:
+#       * no pending changes in $iis
+
+
+commit_message="TFS Sync"
+if [[ -n $1 ]] then
+    commit_message=$1
+fi
+
+
+cd $tfs && echo "━━━━━ TFS Status: ($tfs) ━━━━━━"
+git status
+cd $tfs && echo "━━━━━ TFS Commit: ($tfs) ━━━━━━"
+git commit -a -m "$commit_message"
+
+cd $iis && echo "━━━━━ IIS Pull($iis) ━━━━━━"
+git pull
+
+cd $tfs && echo "━━━━━ TFS Status ($tfs) ━━━━━━"
+git status
+
+cd $iis && echo "━━━━━ IIS Status ($iis) ━━━━━━"
+git status

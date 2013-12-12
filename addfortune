@@ -1,0 +1,18 @@
+#!/usr/bin/env zsh
+#
+#   Add fortunes to your own personal collection and make them a part of the
+#   system's fortune collection
+#
+
+my_fortune_file='jdc-at-str'
+
+cd ~/SpiderOak-Hive/fortunes
+# Edit the file
+vim $my_fortune_file;
+
+# Convert it to a form fortune expects
+/usr/sbin/strfile.exe $my_fortune_file;
+
+# And copy both to the dir where fortune expects to find it.
+cp -v $my_fortune_file* /usr/share/games/fortunes
+

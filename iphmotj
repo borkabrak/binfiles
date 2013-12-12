@@ -1,0 +1,21 @@
+#!/usr/bin/env ruby
+#
+#   Pseudo-crypt text by shifting each consonant and vowel one consonant or
+#   vowel to the right (e.g., 'english' becomes 'iphmotj')
+#
+#   The idea is that the transform leaves the text sort of pronounceable.
+#
+#   Handles text as arguments or from STDIN.  Non-letters are ignored.
+
+plaintext = ""
+(ARGV.length > 0 ? ARGV[0] : gets).downcase.split(//).each do |c|
+
+    ['bcdfghjklmnpqrstvwxz', 'aeiouy'].each do |set|
+        c = $1 if set[/#{c}(.)/]
+    end
+
+    plaintext += c
+
+end
+
+puts plaintext

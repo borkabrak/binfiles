@@ -1,0 +1,66 @@
+#!/usr/bin/env perl
+#
+#   Filters input.  Any XML properties with particular names are looked up in
+#   the translation table and replaced with their symbol, if an exact match is
+#   found.
+#
+
+use strict;
+use Data::Dumper;
+use Getopt::Long;
+
+# Just show errors.  Don't output translations.
+my $scan = 0;
+GetOptions(
+        'scan' => \$scan
+);
+
+# Get translations
+my $translation_table = "/cygdrive/c/TFS/Data Intelligence Tool/src/client/DEV/client/lang/en.htm";
+open TRANS, $translation_table or die "Couldn't open $translation_table:$!";
+my %translations = {};
+my @symbols = [];
+while (<TRANS>) {
+    chomp;
+    # Assumptions:
+    #   * the entire <di_text> is on a single line.
+    #   * the 'text' property precedes the 'trans' property
+    my ($symbol, $text) = /<di_text.*text\s*=\s*"(.*?)".*trans\s*=\s*"(.*?)"/;
+    if ($symbol and $text){
+        $translations{$text} = $symbol;
+        push @symbols, $symbol;
+    }
+
+};
+
+#print Dumper(\%translations);
+
+# Translate input
+my $translations_done = 0;
+while (<>){
+    if ($_ !~ /di_snippet|di_filter|di_.*filter/) {;
+        my (undef, $candidate) = /(tab|caption|text|header)\s*=\s*"(.*?)"/;
+        if ($candidate) {
+            #print ">>>$candidate\n";
+            if ($translations{$candidate}){
+                # Do replacement
+                $scan and print "$.:$candidate => $translations{$candidate}\n";
+                s/\Q$candidate\E/$translations{$candidate}/;
+                $translations_done++;
+
+            } elsif (grep {$_ eq $candidate} values %translations ) {
+                # print "$candidate is already translated\n";
+
+            } else {
+                # Notify 
+                print STDERR "$.:Translation needed for '$candidate':\n$.:$_"
+
+            }
+        }
+    }
+
+    # Pass (possibly modified) output through to STDOUT
+    !$scan and print;
+}
+
+print STDERR "$translations_done translations."

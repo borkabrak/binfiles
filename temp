@@ -1,0 +1,7 @@
+#!/usr/bin/env zsh
+
+source ~/bin/zsh/utils.zsh
+
+green "OK"
+yellow "Uh-oh.."
+red "Oh no!"

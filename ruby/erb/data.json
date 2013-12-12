@@ -1,0 +1,30 @@
+[
+  {
+    "captain": "Mal",
+    "name": "Serenity",
+    "crew": [
+      {
+        "name": "Kaylee",
+        "role": "Mechanic"
+      },
+      {
+        "name": "Simon",
+        "role": "Doctor"
+      }
+    ]
+  },
+  {
+    "name": "Aluminum Falcon",
+    "captain": "Han Solo",
+    "crew": [
+      {
+        "role": "Protocol Droid",
+        "name": "C3-PO"
+      },
+      {
+        "role": "Copilot",
+        "name": "Chewbacca"
+      }
+    ]
+  }
+]

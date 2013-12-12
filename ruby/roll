@@ -1,0 +1,14 @@
+#!/usr/bin/env ruby
+#
+#   Simulate dice rolls
+
+if ARGV.length == 0
+    puts "Missing dice spec: (i.e. '2d6')"
+    exit
+end
+
+ARGV[0].match(/(\d+)d(\d+)/)
+
+rolls = (1..$1.to_i).map { rand($2.to_i) + 1 }
+puts rolls.join('-')
+puts rolls.reduce { |x,y| x + y }

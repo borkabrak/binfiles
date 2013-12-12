@@ -1,0 +1,104 @@
+#!/usr/bin/env perl
+
+use strict;
+use 5.010;
+use autodie;
+use File::Slurp;
+use Getopt::Long;
+
+# params (and defaults)
+my (
+    $select,
+    $delete,
+    $filename) 
+
+= (
+    undef,
+    undef,
+    ".list.txt",
+);
+
+GetOptions( 
+    "select=i" => \$select,                         # select an individual item
+    "delete:i" => sub { $delete = $_[1] || 1},      # delete defaults to the first item
+    "list=s"   => \$filename,                       # select a filename
+);
+
+# All list files are relative to the home dir.
+$filename = $ENV{HOME} . "/" . $filename;
+
+# Any other (non-specified) params comprise an item to add
+my $add = join(' ',@ARGV);
+
+# Get list
+my @list;
+-e$filename and @list = read_file($filename);
+
+# Apply changes and save
+if ($add or $delete) {
+    splice(@list, $delete-1, 1) if $delete; 
+    unshift(@list, "$add\n") if $add; # Add to the top - LIFO, like a stack
+    write_file($filename, @list) or warn "Unable to save list!\n$@\n";
+}
+
+# Show list
+my $linenum = 0;
+@list or say "Empty List";
+for (@list){
+
+    $linenum++;
+
+    # If we have don't have a select param, print (show all lines).
+    # If we have a select param AND it's the current line, print.
+    if (!$select or $select == $linenum) {
+        print "$linenum: $_";
+    }
+
+};
+
+=pod
+
+=head1 NAME 
+
+    noteout - dead simple list keeping
+
+=head1 SYNOPSIS
+
+    noteout 
+    noteout [item] [-s|--select <index>] [-d|--delete <index>] [-l|--list <listname>]
+
+=head1 DESCRIPTION
+
+    noteout manages a single list - presumably a todo list.  It aims to
+    require as little thought as possible.    
+
+=head1 OPTIONS
+
+B<<item>>
+
+    Add the given item to the list.  Quotes are optional, but keep in mind
+    that the line is subject to shell expansion.  
+
+B<-s --select <index>>
+    
+    Display only the given item.
+
+B<-d --delete <index>>
+
+    Delete the item with the given index.  Index will match the item
+    number given when the list is displayed.
+
+B<-l --list <list>>
+
+    Specify a non-default file to use.  Optional.  This value is relative to
+    the user's home dir, so saying 'noteout -l bork' indicates a file at
+    $ENV{HOME} . "/bork"
+
+=head1 TODO
+
+
+=head1 AUTHOR
+
+    Jonathan Carter, 2012
+   
+=cut

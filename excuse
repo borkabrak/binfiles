@@ -1,0 +1,2 @@
+#!/usr/bin/env zsh
+w3m -dump http://developerexcuses.com/ | head -1 | perl -pe 's/\s{2,}//g'

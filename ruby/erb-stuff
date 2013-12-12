@@ -1,0 +1,9 @@
+1.) Experimenting with erb, to see if I can mimic Perl's TTK.
+
+2.) According to erb, 3 * 4 = <%= 3 * 4 %>
+
+3.) Trying to <% puts "return output" %>
+
+Dammit, <% 10.times do |i| %>
+work (<% puts i %>)
+<% end %>

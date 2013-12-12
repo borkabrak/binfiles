@@ -1,0 +1,2 @@
+#!/usr/bin/env zsh
+apt-file search $1 | awk -F':' '{print $1}' | sort -u

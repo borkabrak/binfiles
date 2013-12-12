@@ -1,0 +1,13 @@
+#!/usr/bin/env zsh
+#
+#   Grep ditool codebase
+grep -nr $* \
+    --color=always \
+    --exclude 'date.js' \
+    --exclude 'raphael.js' \
+    --exclude 'cufon.js' \
+    --exclude 'jquery.js' \
+    --exclude-dir '.git' # |
+
+# Print divisions between different file names
+#perl -pe '/(.*?):/; if ($f ne $1) { print "----------\n"; $f = $1 }' 

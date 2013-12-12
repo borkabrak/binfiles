@@ -1,0 +1,69 @@
+#!/usr/bin/env node
+// vim:set ft=javascript:
+
+require("./jclib.js");
+
+var Dad = {
+
+    fname: "Harold",
+    mname: "Frank",
+    lname: "Carter",
+    toString: function(){
+        return this.fname + " " + this.mname + " " + this.lname;
+    }
+    
+}
+
+/*
+    Object.create
+
+    Use it with a single object parameter to do true prototypical inheritance
+    from that object.
+
+    Now sit comfortably and sip your coffee, smoke a joint.. however it is you
+    relax, because here comes the optional second parameter to Object.create:
+    the Properties Object:
+
+    FACEPALM ONE:
+    You can't just say { property: value }.  The properties object to
+    Object.create is for description - modifying HOW THE PROPERTIES BEHAVE, not
+    really what their values are.  (You *can* set the values, but it's an afterthought.)
+
+    FACEPALM TWO:
+    If you use the property description param, beware - it causes any property
+    specified to default to being SILENTLY UNWRITABLE.  You have to use
+    'writable: true' to explicitly avoid that.
+
+    FACEPALM THREE:
+    Read all about the allowed structure of the properties object in
+    Object.create at MDN's documentation for the method *ahem*
+    Object.defineProperty.  
+
+        https://developer.mozilla.org/en-US/docs/JavaScript/Reference/Global_Objects/Object/defineProperty
+
+*/
+
+Me = Object.create(Dad, {
+
+    fname: { 
+        /* 
+            This description form duplicates 'normal' property behavior - for
+            this behaviour, it's easier just to not put this property in the
+            description.
+        */
+        get: function() { return fname },
+        set: function(val) { fname = val },
+    },
+
+    mname: {
+        writable: true
+    },
+
+});
+
+Me.fname = "Jizzle";
+Me.mname = "McNizzle";
+
+console.log("Dad: %s", Dad.toString());
+console.log("Me: %s", Me.toString());
+

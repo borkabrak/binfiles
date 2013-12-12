@@ -1,0 +1,27 @@
+#!/usr/bin/env zsh
+# Hand-rolled command line for viewing man pages
+# Apply with:
+#   export MANPAGER=<this file>
+#
+#   Keys kept from 'less':
+#
+#       - 'j' and 'k' scroll the whole window up and down.  To get normal vim
+#       cursor movement, use arrow keys
+#       - 'q' quits
+#       - <SPACE> pages down, 'b' pages up.
+#
+#   Some benefits vim adds:
+#
+#       - Syntax highlighting!
+#
+#       - Follow a link to another man page with ^].  Navigate back and forth
+#       among jumps with ^O, ^I, etc.
+#less -isrR $* | vim -c 'set ft=man ts=8 nomod nolist nonu noma' \
+
+col -b | vim -c 'set ft=man ts=8 nomod nolist nonu noma' \
+-c 'nnoremap k ' \
+-c 'nnoremap j ' \
+-c 'nnoremap <SPACE> ' \
+-c 'nnoremap b ' \
+-c 'nnoremap q ZQ' \
+-

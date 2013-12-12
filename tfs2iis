@@ -1,0 +1,16 @@
+#!/usr/bin/env zsh
+#
+#   Move changes from TFS to IIS and sync repositories.
+#
+#   Do this AFTER committing to the TFS repository.
+
+cd "$iis" && 
+
+git pull "$tfs" && 
+
+cd "$tfs" && 
+
+git pull "$iis" && 
+
+# output status of both repos
+di-status

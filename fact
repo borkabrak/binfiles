@@ -1,0 +1,10 @@
+#!/usr/bin/env ruby
+# factorial
+
+
+
+def fact(n)
+    ( n < 2 ) ? 1 : n * fact(n-1)
+end
+
+puts fact ARGV[0].to_i

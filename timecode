@@ -1,0 +1,10 @@
+#!/usr/bin/env ruby
+
+# Output time of day as a single number representing the number of
+# minutes since the day began at midnight (0..1440)
+#
+# Why?  I really don't know what to say to that..
+
+t = Time.new
+puts t.hour * 60 + t.min
+

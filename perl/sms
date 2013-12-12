@@ -1,0 +1,33 @@
+#!/usr/bin/env perl
+ 
+# This script requires that a config file be created in the
+# invoking user's home directory called ".sms.conf".
+# The config file must contain the user's Google Voice email
+# on the first line and the password on the second line.
+ 
+use strict;
+use warnings;
+ 
+# handle cross-platform home detection
+use File::HomeDir;
+ 
+# access Google Voice (unofficial) API
+use WebService::Google::Voice::SendSMS;
+ 
+if( @ARGV != 2 ){
+   die( "sms <phone #> <msg>\n" );
+}
+ 
+open( CONF, File::HomeDir->my_home.'/.sms.conf' ) or
+   die "Failed to open ~/.sms.conf\n";
+ 
+my @auth = <CONF>;
+chomp @auth;
+die "Malformed config file found. Format should be <email>\\n<password>\n"
+   if @auth != 2;
+ 
+my $sms = WebService::Google::Voice::SendSMS->new( $auth[0], $auth[1] );
+ 
+# should really be sanitizing args...
+$sms->send_sms( $ARGV[0], $ARGV[1] ) ?
+   exit 0 : exit 1;

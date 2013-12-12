@@ -1,0 +1,15 @@
+#!/usr/bin/env zsh
+#
+#   Find all values of 'datesource' in all html files in current directory.
+#grep -Pnr  'datesource' *.htm | 
+#
+#perl -ne '/(.*):(.*):.*datesource="([^"]*)"/;print qq($3\t\t$1:$2\n)' | 
+#
+#column -t | 
+#
+#grep --color=always -P '^\s*\w*:\w*'
+
+for file in $(find -name "*.htm"); do
+    grep -HP --color "datesource=\s*\"([^\"\s]*)\"" $file
+    grep -HP --color datesource $file
+done

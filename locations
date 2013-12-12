@@ -1,0 +1,26 @@
+#!/usr/bin/zsh
+#
+# Abbreviate 'locate' output to show just <n> path elements
+# It tells you just what directories the thing is in, down to a certain depth.
+# Meant to avoid an indecipherable wall of text.
+#
+# USAGE:
+#   
+#   locations <search term> <path limit>
+#
+#   <search term> is passed directly to 'locate'
+#
+#   <path limit> is how much of the path to work with - a higher number will
+#   show more precise locations, but will promote a proliferation of detail
+
+# Knock a bit off (awk counts before and after as fields)
+lim=$(( $2 + 2 ))
+
+# Initial data
+locate $1 | 
+
+# Print as much of the full path as requested
+awk -v "lim=$lim" -F'/' '{for(i=1;i<lim;i++){printf("%s/",$i)};print("")}' |
+
+# Purge dupes
+sort -u

@@ -1,0 +1,1733 @@
+%{
+
+=pod
+
+=head1 NAME
+
+JavaScript::Parse::PurePerl - A pure perl JavaScript parser
+
+=head1 DESCRIPTION
+
+This module parses a JavaScript(1.5) file, reports errors if there are
++ any, and
+pretty-print the file. There is currently no method to do anything els
++e with it,
+unless you want to modify the semantic actions in the grammar.
+
+The grammar this parser is based on was written by by Waldemar Horwat,
++ and it can
+be found at L<http://www.mozilla.org/js/language/grammar14.html>
+
+It is currently in _extremely alpha_, and even though the Lexer and Pa
++rser seem
+to be going okay, there's probably a fair number of bug.
+
+=head1 SYNOPSIS
+
+ use JavaScript::Parse::PurePerl;
+
+ my $js_parser = JavaScript::Parse::PurePerl->new();
+ print $js_parser->parse(<<'_EOJS_');
+   function foo(bar){    // JS Comment
+    window.location="http://www."+bar+'.com'}
+   baz=quux++;
+ _EOJS_
+
+=head1 METHODS
+
+=over 4
+
+=item new()
+
+Load a new parser.
+
+=item parse($string)
+
+Parse the passed string and returns this string pretty-printed. The pa
++rser dies
+if there is a syntax error in the source, indicating the line it happe
++ned, the
+current and expected tokens.
+
+=back
+
+=head1 BUGS
+
+Currently, a lot. See the TODO file for a list.
+
+=head1 SEE ALSO
+
+Parse::Yapp, JavaScript
+
+=head1 AUTHOR
+
+Briac Pilpré <briac@cpan.org>
+
+=head1 COPYRIGHT
+
+Copyright (c) 2002 Briac Pilpré. All rights reserved.
+
+The Parse::Yapp module and its related modules and shell scripts are c
++opyright
+(c) 1998-2001 Francois Desarmenien, France. All rights reserved.
+
+You may use and distribute them under the terms of either the GNU Gene
++ral
+Public License or the Artistic License, as specified in the Perl READM
++E file.
+
+=cut
+
+
+require 5.004;
+use strict;
+use Carp;
+use vars qw( $input @lineno $level %style $VERSION $current_line );
+
+$VERSION = "0.01_1";
+
+
+%style = (
+    tab => " " x 4,    # default tab is 4 spaces
+);
+
+
+sub _indent {
+    my $offset = shift || $level;
+    $style{tab} x $offset
+}
+
+# Automatically add braces to 'if', 'else' and 'for' constructs, with 
++the
+# proper indentation
+sub _add_braces {
+    return $_[0] =~ /^\s*{/s ? $_[0] : "{\n" . _indent($level?$level-1
++:1). "$_[0]\n" . _indent() . "}";
+}
+
+sub _function_doc {
+    my ($name, $params) = @_;
+    return '';
+    $params =~ /\(([^)]*)\)/;
+    $params = join "\n", map " * \@param $_ Description", split(/,\s*/
++, $1);
+    $params ||= " *";
+    return <<"_FUNC_";
+/**
+ * function $name Description
+$params
+ */
+_FUNC_
+}
+
+%}
+
+%expect 54    /* All due to the 'empty' rule in OptionalSemicolon */
+
+%start Program
+
+%token NUMBER
+%token STRING
+%token IDENTIFIER
+
+%left  ','
+%right '=' '*=' '/=' '%=' '+=' '-=' '<<=' '>>=' '>>>=' '&=' '^=' '|='
+%left  '?' ':'
+%left  '||'
+%left  '&&'
+%left  '|'
+%left  '^'
+%left  '&'
+%left  '==' '!=' '===' '!=='
+%left  '<' '<=' '>' '>='
+%left  '<<' '>>' '>>>'
+%left  '+' '-'
+%left  '*' '/' '%'
+%right '!' '~' UNARY_PLUS UNARY_MINUS '++' '--' 'typeof' 'void' 'delet
++e'
+%left  '(' ')' '[' ']' '.'
+%right POSTFIX
+
+%%
+
+/*
+    Primary Expressions
+*/
+
+PrimaryExpression_normal:
+        SimpleExpression
+    |    FunctionExpression
+    |    ObjectLiteral
+    ;
+
+PrimaryExpression_initial:
+        SimpleExpression
+    ;
+
+SimpleExpression:
+        'this'
+    |    'null'
+    |    'true'
+    |    'false'
+    |    NUMBER
+    |    STRING
+    |    IDENTIFIER
+    |    REGULAR_EXPRESSION
+    |    ParenthesizedExpression
+    |    ArrayLiteral
+    ;
+
+ParenthesizedExpression:
+        '(' Expression_normal_allowIn ')'
+                                                    { "($_[2])" }
+    ;
+
+/*
+    Function Expressions
+*/
+
+FunctionExpression:
+        AnonymousFunction
+    |    NamedFunction
+    ;
+
+/*
+    Object Literals
+*/
+
+ObjectLiteral:
+        '{' '}'
+                                                    { "{}" }
+    |    '{' FieldList '}'
+                                                    { "{ $_[2] }" }
+    ;
+
+FieldList:
+        LiteralField
+    |    FieldList ',' LiteralField
+                                                    { "$_[1], $_[3]" }
+    ;
+
+LiteralField:
+        IDENTIFIER ':' AssignmentExpression_normal_allowIn
+                                                    { "$_[1]: $_[3]" }
+    ;
+
+/*
+    Array Literals
+*/
+
+ArrayLiteral:
+        '[' ']'
+                                                    { "[]" }
+    |    '[' ElementList ']'
+                                                    { "[$_[2]]" }
+    ;
+
+ElementList:
+        LiteralElement
+    |    ElementList ',' LiteralElement
+                                                    { "$_[1], $_[3]" }
+    ;
+
+LiteralElement:
+        AssignmentExpression_normal_allowIn
+    ;
+
+/*
+    Left-Side Expressions
+*/
+
+LeftSideExpression_normal:
+        CallExpression_normal
+    |    ShortNewExpression
+    ;
+
+LeftSideExpression_initial:
+        CallExpression_initial
+    |    ShortNewExpression
+    ;
+
+CallExpression_normal:
+        PrimaryExpression_normal
+    |    FullNewExpression
+    |    CallExpression_normal MemberOperator
+                                                    { "$_[1]$_[2]" }
+    |    CallExpression_normal Arguments
+                                                    { "$_[1]$_[2]" }
+    ;
+
+CallExpression_initial:
+        PrimaryExpression_initial
+    |    FullNewExpression
+    |    CallExpression_initial MemberOperator
+                                                    { "$_[1]$_[2]" }
+    |    CallExpression_initial Arguments
+                                                    { "$_[1]$_[2]" }
+    ;
+
+FullNewExpression:
+        'new' FullNewSubexpression Arguments
+                                                    { "new $_[2]$_[3]"
++ }
+    ;
+
+ShortNewExpression:
+        'new' ShortNewSubexpression
+                                                    { "new $_[2]" }
+    ;
+
+FullNewSubexpression:
+        PrimaryExpression_normal
+    |    FullNewExpression
+    |    FullNewSubexpression MemberOperator
+                                                    { "$_[1]$_[2]" }
+    ;
+
+ShortNewSubexpression:
+        FullNewSubexpression
+    |    ShortNewExpression
+    ;
+
+MemberOperator:
+        '[' Expression_normal_allowIn  ']'
+                                                    { "[$_[2]]" }
+    |    '.' IDENTIFIER
+                                                    { ".$_[2]" }
+    ;
+
+Arguments:
+        '(' ')'
+                                                    { "()" }
+    |    '(' ArgumentList ')'
+                                                    { "($_[2])" }
+    ;
+
+ArgumentList:
+        AssignmentExpression_normal_allowIn
+    |    ArgumentList ',' AssignmentExpression_normal_allowIn
+                                                    { "$_[1], $_[3]" }
+    ;
+
+/*
+    Postfix Operators
+*/
+
+/*
+    XXX Strange things happens here, the LineTerminator seems to magic
++ally work when adding
+        the { 1 } action. I'm 100% sure this will cause serious troubl
++e elsewhere.
+        I think this problem should be fixed in the lexer. brrr...
+*/
+PostfixExpression_normal:
+        LeftSideExpression_normal
+    |    LeftSideExpression_normal  /*{ 1 }*/ /* no LineTerminator */ 
++'++' %prec POSTFIX
+                                    /*     */            { "$_[1]++" }
+    |    LeftSideExpression_normal  /*{ 1 }*/ /* no LineTerminator */ 
++'--' %prec POSTFIX
+                                                     { "$_[1]--" }
+    ;
+
+PostfixExpression_initial:
+        LeftSideExpression_initial
+    |    LeftSideExpression_initial /*{ 1 )*/ /* no LineTerminator */ 
++'++' %prec POSTFIX
+                                    /*    )*/             { "$_[1]++" 
++}
+    |    LeftSideExpression_initial /*{ 1 )*/ /* no LineTerminator */ 
++'--' %prec POSTFIX
+                                                    { "$_[1]--" }
+    ;
+
+/*
+    Unary Operators
+*/
+
+UnaryExpression_normal:
+        PostfixExpression_normal
+    |    'delete' LeftSideExpression_normal
+                                                    { "delete $_[2]" }
+    |    'void' UnaryExpression_normal
+                                                    { "void $_[2]" }
+    |    'typeof' UnaryExpression_normal
+                                                    { "typeof $_[2]" }
+    |    '++' LeftSideExpression_normal
+                                                    { "++$_[2]" }
+    |    '--' LeftSideExpression_normal
+                                                    { "--$_[2]" }
+    |    '+' UnaryExpression_normal %prec UNARY_PLUS
+                                                    { "+$_[2]" }
+    |    '-' UnaryExpression_normal %prec UNARY_MINUS
+                                                    { "-$_[2]" }
+    |    '~' UnaryExpression_normal
+                                                    { "~$_[2]" }
+    |    '!' UnaryExpression_normal
+                                                    { "!$_[2]" }
+    ;
+
+UnaryExpression_initial:
+        PostfixExpression_initial
+    |    'delete' LeftSideExpression_normal
+                                                    { "delete $_[2]" }
+    |    'void' UnaryExpression_normal
+                                                    { "void $_[2]" }
+    |    'typeof' UnaryExpression_normal
+                                                    { "typeof $_[2]" }
+    |    '++' LeftSideExpression_normal
+                                                    { "++$_[2]" }
+    |    '--' LeftSideExpression_normal
+                                                    { "--$_[2]" }
+    |    '+' UnaryExpression_normal %prec UNARY_PLUS
+                                                    { "+$_[2]" }
+    |    '-' UnaryExpression_normal %prec UNARY_MINUS
+                                                    { "-$_[2]" }
+    |    '~' UnaryExpression_normal
+                                                    { "~$_[2]" }
+    |    '!' UnaryExpression_normal
+                                                    { "!$_[2]" }
+    ;
+/*
+    Multiplicative Operators
+*/
+
+MultiplicativeExpression_normal:
+        UnaryExpression_normal
+    |    MultiplicativeExpression_normal '*' UnaryExpression_normal
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    |    MultiplicativeExpression_normal '/' UnaryExpression_normal
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    |    MultiplicativeExpression_normal '%' UnaryExpression_normal
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    ;
+
+MultiplicativeExpression_initial:
+        UnaryExpression_initial
+    |    MultiplicativeExpression_initial '*' UnaryExpression_normal
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    |    MultiplicativeExpression_initial '/' UnaryExpression_normal
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    |    MultiplicativeExpression_initial '%' UnaryExpression_normal
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    ;
+
+/*
+    Additive Operators
+*/
+
+AdditiveExpression_normal:
+        MultiplicativeExpression_normal
+    |    AdditiveExpression_normal '+' MultiplicativeExpression_normal
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    |    AdditiveExpression_normal '-' MultiplicativeExpression_normal
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    ;
+
+AdditiveExpression_initial:
+        MultiplicativeExpression_initial
+    |    AdditiveExpression_initial '+' MultiplicativeExpression_norma
++l
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    |    AdditiveExpression_initial '-' MultiplicativeExpression_norma
++l
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    ;
+
+/*
+    Bitwise Shift Operators
+*/
+
+ShiftExpression_normal:
+        AdditiveExpression_normal
+    |    ShiftExpression_normal '<<'  AdditiveExpression_normal
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    |    ShiftExpression_normal '>>'  AdditiveExpression_normal
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    |    ShiftExpression_normal '>>>' AdditiveExpression_normal
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    ;
+
+ShiftExpression_initial:
+        AdditiveExpression_initial
+    |    ShiftExpression_initial '<<'  AdditiveExpression_normal
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    |    ShiftExpression_initial '>>'  AdditiveExpression_normal
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    |    ShiftExpression_initial '>>>' AdditiveExpression_normal
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    ;
+
+/*
+    Relational Operators
+*/
+
+RelationalExpression_normal_allowIn :
+        ShiftExpression_normal
+    |    RelationalExpression_normal_allowIn  '<'  ShiftExpression_nor
++mal
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    |    RelationalExpression_normal_allowIn  '>'  ShiftExpression_nor
++mal
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    |    RelationalExpression_normal_allowIn  '<=' ShiftExpression_nor
++mal
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    |    RelationalExpression_normal_allowIn  '>=' ShiftExpression_nor
++mal
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    |    RelationalExpression_normal_allowIn  'instanceof' ShiftExpres
++sion_normal
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    |    RelationalExpression_normal_allowIn  'in' ShiftExpression_nor
++mal
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    ;
+
+RelationalExpression_initial_allowIn :
+        ShiftExpression_initial
+    |    RelationalExpression_initial_allowIn '<'  ShiftExpression_nor
++mal
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    |    RelationalExpression_initial_allowIn '>'  ShiftExpression_nor
++mal
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    |    RelationalExpression_initial_allowIn '<=' ShiftExpression_nor
++mal
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    |    RelationalExpression_initial_allowIn '>=' ShiftExpression_nor
++mal
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    |    RelationalExpression_initial_allowIn 'instanceof' ShiftExpres
++sion_normal
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    |    RelationalExpression_initial_allowIn 'in' ShiftExpression_nor
++mal
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    ;
+
+RelationalExpression_normal_noIn :
+        ShiftExpression_normal
+    |    RelationalExpression_normal_noIn  '<' ShiftExpression_normal
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    |    RelationalExpression_normal_noIn  '>' ShiftExpression_normal
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    |    RelationalExpression_normal_noIn  '<=' ShiftExpression_normal
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    |    RelationalExpression_normal_noIn  '>=' ShiftExpression_normal
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    |    RelationalExpression_normal_noIn  'instanceof' ShiftExpressio
++n_normal
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    ;
+
+/* XXX Useless rule
+RelationalExpression_initial_noIn :
+        ShiftExpression_initial
+    |    RelationalExpression_initial_noIn '<' ShiftExpression_normal
+    |    RelationalExpression_initial_noIn '>' ShiftExpression_normal
+    |    RelationalExpression_initial_noIn '<=' ShiftExpression_normal
+    |    RelationalExpression_initial_noIn '>=' ShiftExpression_normal
+    |    RelationalExpression_initial_noIn 'instanceof' ShiftExpressio
++n_normal
+    ;
+*/
+
+/*
+    Equality Operators
+*/
+
+EqualityExpression_normal_allowIn:
+        RelationalExpression_normal_allowIn
+    |    EqualityExpression_normal_allowIn '=='  RelationalExpression_
++normal_allowIn
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    |    EqualityExpression_normal_allowIn '!='  RelationalExpression_
++normal_allowIn
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    |    EqualityExpression_normal_allowIn '===' RelationalExpression_
++normal_allowIn
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    |    EqualityExpression_normal_allowIn '!==' RelationalExpression_
++normal_allowIn
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    ;
+
+EqualityExpression_normal_noIn:
+        RelationalExpression_normal_noIn
+    |    EqualityExpression_normal_noIn '=='  RelationalExpression_nor
++mal_noIn
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    |    EqualityExpression_normal_noIn '!='  RelationalExpression_nor
++mal_noIn
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    |    EqualityExpression_normal_noIn '===' RelationalExpression_nor
++mal_noIn
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    |    EqualityExpression_normal_noIn '!==' RelationalExpression_nor
++mal_noIn
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    ;
+
+EqualityExpression_initial_allowIn:
+        RelationalExpression_initial_allowIn
+    |    EqualityExpression_initial_allowIn '=='  RelationalExpression
++_normal_allowIn
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    |    EqualityExpression_initial_allowIn '!='  RelationalExpression
++_normal_allowIn
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    |    EqualityExpression_initial_allowIn '===' RelationalExpression
++_normal_allowIn
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    |    EqualityExpression_initial_allowIn '!==' RelationalExpression
++_normal_allowIn
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    ;
+
+/* XXX Useless rule
+EqualityExpression_initial_noIn:
+        RelationalExpression_initial_noIn
+    |    EqualityExpression_initial_noIn '=='  RelationalExpression_no
++rmal_noIn
+    |    EqualityExpression_initial_noIn '!='  RelationalExpression_no
++rmal_noIn
+    |    EqualityExpression_initial_noIn '===' RelationalExpression_no
++rmal_noIn
+    |    EqualityExpression_initial_noIn '!==' RelationalExpression_no
++rmal_noIn
+    ;
+*/
+
+/*
+    Binary Bitwise Operators
+*/
+
+BitwiseAndExpression_normal_allowIn:
+        EqualityExpression_normal_allowIn
+    |    BitwiseAndExpression_normal_allowIn '&' EqualityExpression_no
++rmal_allowIn
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    ;
+
+BitwiseAndExpression_normal_noIn:
+        EqualityExpression_normal_noIn
+    |    BitwiseAndExpression_normal_noIn '&' EqualityExpression_norma
++l_noIn
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    ;
+
+BitwiseAndExpression_initial_allowIn:
+        EqualityExpression_initial_allowIn
+    |    BitwiseAndExpression_initial_allowIn '&' EqualityExpression_n
++ormal_allowIn
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    ;
+
+/* XXX Useless rule
+BitwiseAndExpression_initial_noIn:
+        EqualityExpression_initial_noIn
+    |    BitwiseAndExpression_initial_noIn '&' EqualityExpression_norm
++al_noIn
+    ;
+*/
+
+BitwiseXorExpression_normal_allowIn:
+        BitwiseAndExpression_normal_allowIn
+    |    BitwiseXorExpression_normal_allowIn '^' BitwiseAndExpression_
++normal_allowIn
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    ;
+
+BitwiseXorExpression_normal_noIn:
+        BitwiseAndExpression_normal_noIn
+    |    BitwiseXorExpression_normal_noIn '^' BitwiseAndExpression_nor
++mal_noIn
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    ;
+
+BitwiseXorExpression_initial_allowIn:
+        BitwiseAndExpression_initial_allowIn
+    |    BitwiseXorExpression_initial_allowIn '^' BitwiseAndExpression
++_normal_allowIn
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    ;
+
+/* XXX Useless rule
+BitwiseXorExpression_initial_noIn:
+        BitwiseAndExpression_initial_noIn
+    |    BitwiseXorExpression_initial_noIn '^' BitwiseAndExpression_no
++rmal_noIn
+    ;
+*/
+
+/* XXX */
+BitwiseOrExpression_normal_allowIn:
+        BitwiseXorExpression_normal_allowIn
+    |    BitwiseOrExpression_normal_allowIn '|' BitwiseXorExpression_n
++ormal_allowIn
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    ;
+
+BitwiseOrExpression_normal_noIn:
+        BitwiseXorExpression_normal_noIn
+    |    BitwiseOrExpression_normal_noIn '|' BitwiseXorExpression_norm
++al_noIn
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    ;
+
+BitwiseOrExpression_initial_allowIn:
+        BitwiseXorExpression_initial_allowIn
+    |    BitwiseOrExpression_initial_allowIn '|' BitwiseXorExpression_
++normal_allowIn
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    ;
+
+/* XXX Useless rule
+BitwiseOrExpression_initial_noIn:
+        BitwiseXorExpression_initial_noIn
+    |    BitwiseOrExpression_initial_noIn '|' BitwiseXorExpression_nor
++mal_noIn
+    ;
+*/
+
+/*
+    Binary Logical Operators
+*/
+
+LogicalAndExpression_normal_allowIn:
+        BitwiseOrExpression_normal_allowIn
+    |    LogicalAndExpression_normal_allowIn '&&' BitwiseOrExpression_
++normal_allowIn
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    ;
+
+LogicalAndExpression_normal_noIn:
+        BitwiseOrExpression_normal_noIn
+    |    LogicalAndExpression_normal_noIn '&&' BitwiseOrExpression_nor
++mal_noIn
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    ;
+
+LogicalAndExpression_initial_allowIn:
+        BitwiseOrExpression_initial_allowIn
+    |    LogicalAndExpression_initial_allowIn '&&' BitwiseOrExpression
++_normal_allowIn
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    ;
+
+/* XXX Useless rule
+LogicalAndExpression_initial_noIn:
+        BitwiseOrExpression_initial_noIn
+    |    LogicalAndExpression_initial_noIn '&&' BitwiseOrExpression_no
++rmal_noIn
+    ;
+*/
+
+LogicalOrExpression_normal_allowIn:
+        LogicalAndExpression_normal_allowIn
+    |    LogicalOrExpression_normal_allowIn '||' LogicalAndExpression_
++normal_allowIn
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    ;
+
+LogicalOrExpression_normal_noIn:
+        LogicalAndExpression_normal_noIn
+    |    LogicalOrExpression_normal_noIn '||' LogicalAndExpression_nor
++mal_noIn
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    ;
+
+LogicalOrExpression_initial_allowIn:
+        LogicalAndExpression_initial_allowIn
+    |    LogicalOrExpression_initial_allowIn '||' LogicalAndExpression
++_normal_allowIn
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    ;
+
+/* XXX Useless rule
+LogicalOrExpression_initial_noIn:
+        LogicalAndExpression_initial_noIn
+    |    LogicalOrExpression_initial_noIn '||' LogicalAndExpression_no
++rmal_noIn
+    ;
+*/
+
+/*
+    Conditional Operator
+*/
+
+ConditionalExpression_normal_allowIn:
+        LogicalOrExpression_normal_allowIn
+    |    LogicalOrExpression_normal_allowIn '?' AssignmentExpression_n
++ormal_allowIn ':' AssignmentExpression_normal_allowIn
+                                                    { "$_[1] ? $_[3] :
++ $_[5]" }
+    ;
+
+ConditionalExpression_normal_noIn:
+        LogicalOrExpression_normal_noIn
+    |    LogicalOrExpression_normal_noIn '?' AssignmentExpression_norm
++al_noIn ':' AssignmentExpression_normal_noIn
+                                                    { "$_[1] ? $_[3] :
++ $_[5]" }
+    ;
+
+ConditionalExpression_initial_allowIn:
+        LogicalOrExpression_initial_allowIn
+    |    LogicalOrExpression_initial_allowIn '?' AssignmentExpression_
++normal_allowIn ':' AssignmentExpression_normal_allowIn
+                                                    { "$_[1] ? $_[3] :
++ $_[5]" }
+    ;
+
+/* XXX Useless rule
+ConditionalExpression_initial_noIn:
+        LogicalOrExpression_initial_noIn
+    |    LogicalOrExpression_initial_noIn '?' AssignmentExpression_nor
++mal_noIn ':' AssignmentExpression_normal_noIn
+    ;
+*/
+
+/*
+    Assignment Operators
+*/
+
+AssignmentExpression_normal_allowIn:
+        ConditionalExpression_normal_allowIn
+    |    LeftSideExpression_normal '=' AssignmentExpression_normal_all
++owIn
+                                                    { "$_[1] = $_[3]" 
++}
+    |    LeftSideExpression_normal CompoundAssignment AssignmentExpres
++sion_normal_allowIn
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    ;
+
+AssignmentExpression_normal_noIn:
+        ConditionalExpression_normal_noIn
+    |    LeftSideExpression_normal '=' AssignmentExpression_normal_noI
++n
+                                                    { "$_[1] = $_[3]" 
++}
+    |    LeftSideExpression_normal CompoundAssignment AssignmentExpres
++sion_normal_noIn
+                                                    { "$_[1] $_[2] $_[
++3]" }
+    ;
+
+AssignmentExpression_initial_allowIn:
+        ConditionalExpression_initial_allowIn
+    |    LeftSideExpression_initial '=' AssignmentExpression_normal_al
++lowIn
+                                                    { "$_[1] = $_[3]" 
++}
+    |    LeftSideExpression_initial CompoundAssignment AssignmentExpre
++ssion_normal_allowIn
+                                                        { "$_[1] $_[2]
++ $_[3]" }
+    ;
+
+/* XXX Useless rule
+AssignmentExpression_initial_noIn:
+        ConditionalExpression_initial_noIn
+    |    LeftSideExpression_initial '=' AssignmentExpression_normal_no
++In
+    |    LeftSideExpression_initial CompoundAssignment AssignmentExpre
++ssion_normal_noIn
+    ;
+*/
+
+CompoundAssignment:
+        '*='
+    |    '/='
+    |    '%='
+    |    '+='
+    |    '-='
+    |    '<<='
+    |    '>>='
+    |    '>>>='
+    |    '&='
+    |    '^='
+    |    '|='
+    ;
+
+/*
+    Expressions
+*/
+
+Expression_normal_allowIn:
+        AssignmentExpression_normal_allowIn
+    |    Expression_normal_allowIn ',' AssignmentExpression_normal_all
++owIn
+                                                    { "$_[1], $_[3]" }
+    ;
+
+Expression_normal_noIn:
+        AssignmentExpression_normal_noIn
+    |    Expression_normal_noIn ',' AssignmentExpression_normal_noIn
+                                                    { "$_[1], $_[3]" }
+    ;
+
+Expression_initial_allowIn:
+        AssignmentExpression_initial_allowIn
+    |    Expression_initial_allowIn ',' AssignmentExpression_normal_al
++lowIn
+                                                    { "$_[1], $_[3]" }
+    ;
+
+/* XXX Useless rule
+Expression_initial_noIn:
+        AssignmentExpression_initial_noIn
+    |    Expression_initial_noIn ',' AssignmentExpression_normal_noIn
+    ;
+*/
+
+OptionalExpression:
+        Expression_normal_allowIn
+    |    /* empty */
+    ;
+
+/*
+    Statements
+*/
+
+Statement_noShortIf:
+        EmptyStatement
+                                                    { _indent() . "$_[
++1]" }
+    |    ExpressionStatement OptionalSemicolon
+                                                    { _indent() . "$_[
++1];" }
+    |    VariableDefinition OptionalSemicolon
+                                                    { _indent() . "$_[
++1];" }
+    |    Block
+                                                    { "$_[1]" }
+    |    LabeledStatement_noShortIf
+                                                    { _indent() . "$_[
++1];" }
+    |    IfStatement_noShortIf
+                                                    { _indent() . "$_[
++1]" }
+    |    SwitchStatement
+                                                    { _indent() . "$_[
++1]" }
+    |    DoStatement OptionalSemicolon
+                                                    { _indent() . "$_[
++1];" }
+    |    WhileStatement_noShortIf
+                                                    { _indent() . "$_[
++1]" }
+    |    ForStatement_noShortIf
+                                                    { _indent() . "$_[
++1]" }
+    |    WithStatement_noShortIf
+                                                    { _indent() . "$_[
++1]" }
+    |    ContinueStatement OptionalSemicolon
+                                                    { _indent() . "$_[
++1];" }
+    |    BreakStatement OptionalSemicolon
+                                                    { _indent() . "$_[
++1];" }
+    |    ReturnStatement OptionalSemicolon
+                                                    { _indent() . "$_[
++1];" }
+    |    ThrowStatement OptionalSemicolon
+                                                    { _indent() . "$_[
++1];" }
+    |    TryStatement
+                                                    { _indent() . "$_[
++1]" }
+    ;
+
+Statement_full:
+        EmptyStatement
+                                                    { _indent() . "$_[
++1]" }
+    |    ExpressionStatement OptionalSemicolon
+                                                    { _indent() . "$_[
++1];" }
+    |    VariableDefinition OptionalSemicolon
+                                                    { _indent() . "$_[
++1];" }
+    |    Block
+                                                    { "$_[1]" }
+    |    LabeledStatement_full
+                                                    { _indent() . "$_[
++1];" }
+    |    IfStatement_full
+                                                    { _indent() . "$_[
++1]" }
+    |    SwitchStatement
+                                                    { _indent() . "$_[
++1]" }
+    |    DoStatement OptionalSemicolon
+                                                    { _indent() . "$_[
++1];" }
+    |    WhileStatement_full
+                                                    { _indent() . "$_[
++1]" }
+    |    ForStatement_full
+                                                    { _indent() . "$_[
++1]" }
+    |    WithStatement_full
+                                                    { _indent() . "$_[
++1]" }
+    |    ContinueStatement OptionalSemicolon
+                                                    { _indent() . "$_[
++1];" }
+    |    BreakStatement OptionalSemicolon
+                                                    { _indent() . "$_[
++1];" }
+    |    ReturnStatement OptionalSemicolon
+                                                    { _indent() . "$_[
++1];" }
+    |    ThrowStatement OptionalSemicolon
+                                                    { _indent() . "$_[
++1];" }
+    |    TryStatement
+                                                    { _indent() . "$_[
++1]" }
+    ;
+
+OptionalSemicolon:
+        ';'
+    |    /* empty */        /* Gah, this create 54 s/r conflicts! */
+    ;
+
+/*
+    Empty Statement
+*/
+
+EmptyStatement:
+        ';'
+    ;
+
+/*
+    Expression Statement
+*/
+
+ExpressionStatement:
+        /* TODO lookbehind != '{', 'function' */ Expression_initial_al
++lowIn
+                                                    { $_[1] }
+    ;
+
+/*
+    Variable Definition
+*/
+
+VariableDefinition:
+        'var' VariableDeclarationList_allowIn
+                                                    { "var $_[2]" }
+    ;
+
+VariableDeclarationList_allowIn:
+        VariableDeclaration_allowIn
+    |    VariableDeclarationList_allowIn ',' VariableDeclaration_allow
++In
+                                                    { "$_[1], $_[3]" }
+    ;
+
+VariableDeclarationList_noIn:
+        VariableDeclaration_noIn
+    |    VariableDeclarationList_noIn ',' VariableDeclaration_noIn
+                                                    { "$_[1], $_[3]" }
+    ;
+
+VariableDeclaration_allowIn:
+        IDENTIFIER VariableInitializer_allowIn
+                                                    { "$_[1]" . ($_[2]
++? " $_[2]" : '') }
+    ;
+
+VariableDeclaration_noIn:
+        IDENTIFIER VariableInitializer_noIn
+                                                    { "$_[1]" . ($_[2]
++? " $_[2]" : '') }
+    ;
+
+VariableInitializer_allowIn:
+        /* empty */
+    |    '=' AssignmentExpression_normal_allowIn
+                                                    { "= $_[2]" }
+    ;
+
+VariableInitializer_noIn:
+        /* empty */
+    |    '=' AssignmentExpression_normal_noIn
+                                                    { "= $_[2]" }
+    ;
+
+/*
+    Block
+*/
+
+Block:
+        '{' {$level++} BlockStatements {$level--} '}'
+                                                    {
+                        my $r = "\{" . (
+                            $_[3]
+                             ? "\n$_[3]\n" . _indent() 
+                             : ''
+                        ) . "\}";
+                        $r;
+                }
+    ;
+
+BlockStatements:
+        /* empty */
+    |    BlockStatementsPrefix
+    ;
+
+BlockStatementsPrefix:
+        Statement_full
+    |    BlockStatementsPrefix Statement_full
+                                                    { "$_[1]\n$_[2]" }
+    ;
+
+/*
+    Labeled Statements
+*/
+
+LabeledStatement_noShortIf:
+        IDENTIFIER ':' Statement_noShortIf
+                                                    { "$_[1]:$_[2]\n" 
++}
+    ;
+
+LabeledStatement_full:
+        IDENTIFIER ':' Statement_full
+                                                    { "$_[1]:$_[2]\n" 
++}
+    ;
+
+/*
+    If Statement
+*/
+
+IfStatement_full:
+        'if' ParenthesizedExpression Statement_full
+                                                    {
+                        "if $_[2] " . _add_braces($_[3]). "\n"
+                }
+    |    'if' ParenthesizedExpression Statement_noShortIf 'else' State
++ment_full
+                                                    {
+                        "if $_[2] ". _add_braces($_[3]) .
+                        " else "   . ( $_[5] =~ s/\s*if\b/if/s ? $_[5]
++ : _add_braces($_[5]) . "\n" )
+                }
+    ;
+
+IfStatement_noShortIf:
+        'if' ParenthesizedExpression Statement_noShortIf 'else' Statem
++ent_noShortIf
+                                                    {
+                        "if $_[2] ". _add_braces($_[3]) .
+                        " else "   . ( $_[5] =~ s/\s*if\b/if/s ? $_[5]
++ : _add_braces($_[5]) . "\n" )
+                }
+    ;
+
+/*
+    Switch Statement
+*/
+
+SwitchStatement:
+        'switch' ParenthesizedExpression '{' '}'
+                                                    { "switch $_[2]\{\
++}\n" }
+    |    'switch' ParenthesizedExpression '{' CaseGroups LastCaseGroup
++ '}'
+                                                    { "switch $_[2] \{
++$_[4]\n$_[5]\n\}\n" }
+    ;
+
+CaseGroups:
+        /* empty */
+    |    CaseGroups CaseGroup
+                                                    { ($_[1] || '') . 
++( $_[2] ? "\n$_[2]\n" : "" ) }
+    ;
+
+CaseGroup:
+        CaseGuards BlockStatementsPrefix    {$level--}
+                                                    { "$_[1]\n" . _ind
++ent() . $_[2] }
+    ;
+
+LastCaseGroup:
+        CaseGuards BlockStatements    { $level--}
+                                                    { "$_[1]\n" . _ind
++ent() .$_[2] }
+    ;
+
+CaseGuards:
+        CaseGuard                                    { $level++; $_[1]
++ }
+    |    CaseGuards CaseGuard
+                                                    { $level++; "$_[1]
++\n$_[2]" }
+    ;
+
+CaseGuard:
+        'case' Expression_normal_allowIn ':'
+                                                    { "case $_[2]:" }
+    |    'default' ':'
+                                                    { "default:" }
+    ;
+
+/*
+    Do-While Statement
+*/
+
+DoStatement:
+        'do' Statement_full 'while' ParenthesizedExpression
+                                                    { "do $_[2] while 
++$_[4]" }
+    ;
+
+/*
+    While Statement
+*/
+
+WhileStatement_noShortIf:
+        'while' ParenthesizedExpression Statement_noShortIf
+                                                    {
+                    "while $_[2]" . (
+                        $_[3] ne ';'
+                            ? " " . _add_braces($_[3]) . "\n"
+                            : ";"
+                        )
+                }
+    ;
+
+WhileStatement_full:
+        'while' ParenthesizedExpression Statement_full
+                                                    {
+                    "while $_[2]" . (
+                        $_[3] ne ';'
+                            ? " " . _add_braces($_[3]) . "\n"
+                            : ";"
+                        )
+                }
+    ;
+
+/*
+    For Statements
+*/
+
+ForStatement_noShortIf:
+        'for' '(' ForInitializer ';' OptionalExpression ';' OptionalEx
++pression ')' Statement_noShortIf
+                                                    {
+                    "for ($_[3]; $_[5]; $_[7] ) " . _add_braces($_[9])
++ . "\n"
+                }
+    |    'for' '(' ForInBinding 'in' Expression_normal_allowIn ')' Sta
++tement_noShortIf
+                                                    {
+                    "for ($_[3] in $_[5]) " . _add_braces($_[7]) . "\n
++"
+                }
+    ;
+
+ForStatement_full:
+        'for' '(' ForInitializer ';' OptionalExpression ';' OptionalEx
++pression ')' Statement_full
+                                                    {
+                    "for (" . ($_[3] || '') . ';'
+                            . ($_[5] ? " $_[5]" : '') . ';'
+                            . ($_[7] ? " $_[7]" : '') . ") " . _add_br
++aces($_[9]) . "\n"
+            }
+    |    'for' '(' ForInBinding 'in' Expression_normal_allowIn ')' Sta
++tement_full
+                                                    {
+                    "for ($_[3] in $_[5]) " . _add_braces($_[7]) . "\n
++"
+            }
+    ;
+
+ForInitializer:
+        /* empty */
+    |    Expression_normal_noIn
+    |    'var' VariableDeclarationList_noIn
+                                                    { "var $_[2]" }
+    ;
+
+ForInBinding:
+        LeftSideExpression_normal
+    |    'var' VariableDeclaration_noIn
+                                                    { "var $_[2]" }
+    ;
+
+/*
+    With Statement
+*/
+
+WithStatement_noShortIf:
+        'with' ParenthesizedExpression Statement_noShortIf
+                                                    {
+                        "with $_[2] " . _add_braces($_[3]) . "\n";
+                }
+    ;
+
+WithStatement_full:
+        'with' ParenthesizedExpression Statement_full
+                                                    {
+                        "with $_[2] " . _add_braces($_[3]) . "\n";
+                }
+    ;
+
+/*
+    Continue and Break Statements
+*/
+
+ContinueStatement:
+        'continue' /* no LineTerminator */ OptionalLabel
+                                                    { "continue" . ($_
++[2]? " $_[2]" : '') }
+    ;
+
+BreakStatement:
+        'break' /* no LineTerminator */ OptionalLabel
+                                                    { "break" . ($_[2]
++? " $_[2]" : '') }
+    ;
+
+OptionalLabel:
+        /* empty */
+    |    IDENTIFIER
+    ;
+
+/*
+    Return Statement
+*/
+
+ReturnStatement:
+        'return' /* no LineTerminator */ OptionalExpression
+                                                    { "return" . ($_[2
++]? " $_[2]" : '') }
+    ;
+
+/*
+    Throw Statement
+*/
+
+ThrowStatement:
+        'throw' /* no LineTerminator */ Expression_normal_allowIn
+                                                    { "throw" . ($_[2]
++? " $_[2]" : '') }
+    ;
+
+/*
+    Try Statement
+*/
+
+TryStatement:
+        'try' Block CatchClauses
+                                                    { "try $_[2] $_[3]
++\n" }
+    |    'try' Block FinallyClause
+                                                    { "try $_[2] $_[3]
++\n" }
+    |    'try' Block CatchClauses FinallyClause
+                                                    { "try $_[2] $_[3]
++ $_[4]\n" }
+    ;
+
+CatchClauses:
+        CatchClause
+    |    CatchClauses CatchClause
+                                                    { "$_[1] $_[2]" }
+    ;
+
+CatchClause:
+        'catch' '(' IDENTIFIER ')' Block
+                                                    { "catch ($_[3]) $
++_[5]" }
+    ;
+
+FinallyClause:
+        'finally' Block
+                                                    { "finally $_[2]" 
++}
+    ;
+
+/*
+    Function Definition
+*/
+
+FunctionDefinition:
+        NamedFunction
+    ;
+
+AnonymousFunction:
+        'function' FormalParametersAndBody
+                                                    { "function$_[2]" 
++}
+    ;
+
+NamedFunction:
+        'function' IDENTIFIER FormalParametersAndBody
+                                                    {
+                _function_doc($_[2], $_[3]) .
+                "function $_[2]$_[3]"
+            }
+    ;
+
+FormalParametersAndBody:
+        '(' FormalParameters ')' '{' {$level++} TopStatements {$level-
++-} '}'
+                                                    {
+                "(" . ( $_[2] || "" ) . ") \{" . ( $_[6] ? "\n$_[6]\n"
++ : "" ) . "\}\n"
+            }
+    ;
+
+FormalParameters:
+        /* empty */
+    |    FormalParametersPrefix
+    ;
+
+FormalParametersPrefix:
+        FormalParameter
+    |    FormalParametersPrefix ',' FormalParameter
+                                                    { "$_[1], $_[3]" }
+    ;
+
+FormalParameter:
+        IDENTIFIER
+    ;
+
+/*
+    Programs
+*/
+
+Program:
+        TopStatements                                { "$_[1]\n" }
+    ;
+
+TopStatements:
+        /* empty */
+    |    TopStatementsPrefix
+    ;
+
+TopStatementsPrefix:
+        TopStatement
+    |    TopStatementsPrefix TopStatement
+                                                    { "$_[1]\n$_[2]" }
+    ;
+
+TopStatement:
+        Statement_full
+    |    FunctionDefinition
+    ;
+
+/*********************************************************************
++*
+ *                                                                    
++*
+ *  Lexer                                                             
++*
+ *                                                                    
++*
+ *********************************************************************
++/
+%%
+
+sub _Error {
+    my $value = $_[0]->YYCurval;
+    _SyntaxError(
+        1,
+        "Unexpected token '"
+          . $_[0]->YYCurtok . "'.\n"
+          . "Expected "
+          . join ( " or ", ( $_[0]->YYExpect ) ),
+        $lineno[0]
+    );
+}
+
+sub _SyntaxError {
+    my ( $level, $message, $lineno ) = @_;
+
+    $message = "*"
+      . [ 'Warning', 'Error', 'Fatal' ]->[$level]
+      . "* $message, at "
+      . ( $lineno < 0 ? "eof" : "line $lineno" ) . ".\n";
+    die $message;
+}
+
+# Heavily inspired by YappParse.yp
+sub _Lexer {
+    my $parser = shift;
+
+    # Check for EOF
+    pos($$input) >= length($$input) and return ( '', undef );
+
+    SKIP_BLANK_AND_COMMENTS: {
+        # XXX Hack to get "a\n++b" working, though now "a;\n++b" will 
++give
+        # "a;\n;\n++b" (which is correct anyway)
+        my $temp_pos = pos($$input);
+        $$input =~ s/\G\s*(\n)\s*([+-]{2})/$1;$2/sg;
+        pos($$input) = $temp_pos;
+
+        # Skip whitespace chars
+        $$input =~ /\G(\s+)/sgc and do {
+            my $blanks = $1;
+
+            #Maybe At EOF
+            pos($$input) >= length($$input) and return ( '', [ undef, 
++-1 ] );
+            $lineno[1] += $blanks =~ tr/\n/\n/;
+        };
+
+        $lineno[0] = $lineno[1];
+
+        # Strip Comments
+        $$input =~ m!\G//(.*)!gc || $$input =~ m!\G/\*(.*?)\*/!sgc and
++ do {
+            my $comments = $1;
+            pos($$input) >= length($$input) and return ( '', [ undef, 
++-1 ] );
+            $lineno[1] += $comments =~ tr/\n//;
+
+            # print "/*\n$comments\n*/\n";
+            redo SKIP_BLANK_AND_COMMENTS;
+        };
+    }
+
+    # BEGIN_LEX
+
+    $$input =~ /\Gdelete\b/gc   and return ( 'delete',   'delete' );
+    $$input =~ /\Gdo\b/gc       and return ( 'do',       'do' );
+    $$input =~ /\Gelse\b/gc     and return ( 'else',     'else' );
+    $$input =~ /\Gfor\b/gc      and return ( 'for',      'for' );
+    $$input =~ /\Gfunction\b/gc and return ( 'function', 'function' );
+    $$input =~ /\Gif\b/gc       and return ( 'if',       'if' );
+    $$input =~ /\Gin\b/gc       and return ( 'in',       'in' );
+    $$input =~ /\Gnew\b/gc      and return ( 'new',      'new' );
+    $$input =~ /\Gthis\b/gc     and return ( 'this',     'this' );
+    $$input =~ /\Gtypeof\b/gc   and return ( 'typeof',   'typeof' );
+    $$input =~ /\Gvar\b/gc      and return ( 'var',      'var' );
+    $$input =~ /\Gvoid\b/gc     and return ( 'void',     'void' );
+    $$input =~ /\Gwhile\b/gc    and return ( 'while',    'while' );
+    $$input =~ /\Gwith\b/gc     and return ( 'with',     'with' );
+    $$input =~ /\Gtry\b/gc      and return ( 'try',      'try' );
+    $$input =~ /\Gcatch\b/gc    and return ( 'catch',    'catch' );
+    $$input =~ /\Gfinally\b/gc  and return ( 'finally',  'finally' );
+    $$input =~ /\Gdefault\b/gc  and return ( 'default',  'default' );
+    $$input =~ /\Gcase\b/gc     and return ( 'case',     'case' );
+    $$input =~ /\Gswitch\b/gc   and return ( 'switch',   'switch' );
+    $$input =~ /\Gnull\b/gc     and return ( 'null',     'null' );
+    $$input =~ /\Gfalse\b/gc    and return ( 'false',    'false' );
+    $$input =~ /\Gtrue\b/gc     and return ( 'true',     'true' );
+
+    # These keywords can not be followed by a LineTerminator token.
+    # If we see one, we add a semi-colon at the end of the keyword.
+    # this should fix some OptionalSemicolon bugs
+    for my $keyword (qw( break continue return throw )) {
+        $$input =~ /\G$keyword\b/gc and do {
+
+            # XXX Dirty pos() work going around. This is
+            # done to insert the semicolon without
+            # destroying the position the lexer was.
+            my $temp_pos = pos($$input);
+            pos($$input) -= length $keyword;
+            if ( $$input =~ /\G$keyword(\s*\n)/gc ) {
+                pos($$input) -= length($keyword) + length($1);
+
+                # Okay, we can ad the semicolon
+                $$input =~ s/\G$keyword\s*\n/$keyword;/;
+            }
+            pos($$input) = $temp_pos;
+            return ( $keyword, $keyword );
+        };
+    }
+
+    # Reserved keywords
+    for my $reserved (
+        qw(
+        abstract boolean   byte         char   class     const    debu
++gger   double
+        enum     export    extends      final  float     goto     impl
++ements import
+        int      interface long         native package   private  prot
++ected  short
+        static   super     synchronized throws transient volatile
+        )
+      )
+    {
+        $$input =~ /\G$reserved\b/gc
+          and
+          _SyntaxError( 1, "'$reserved' is a reserved keyword", $linen
++o[0] );
+    }
+
+    $$input =~ /\G([a-zA-Z\$_][a-zA-Z\$_0-9]*)\b/gc
+      and return ( 'IDENTIFIER', $1 );
+
+    $$input =~ /\G(0[xX][0-9a-fA-F]*)/gc and return ( 'NUMBER', $1 );
+    $$input =~ /\G  (
+             [0-9]+\.?[0-9]*[eE][+-]?[0-9]*
+          |  [0-9]+\.[0-9]*
+          |  [0-9]*\.?[0-9]+[eE][+-]?[0-9]*
+          |  [0-9]*\.[0-9]+
+          |  [1-9][0-9]*
+         )/xgc and return ( 'NUMBER', $1 );
+    $$input =~ /\G(0[0-7]*)/gc and return ( 'NUMBER', $1 );
+
+    # The three following regex are mostly from Regexp::Common
+    $$input =~ /\G(?:"([^\\\"]*(?:\\.[^\\\"]*)*)")/gcs
+      and return ( 'STRING', qq("$1") );
+    $$input =~ /\G(?:'([^\\\']*(?:\\.[^\\\']*)*)')/gcs
+      and return ( 'STRING', qq('$1') );
+
+    # Regex to detect regex...
+    # Note that the regex *cannot* span several line
+    # But I think we're still stuck for the '/=' case
+    # and two division on the same line (i.e: 'foo = 1/2; bar=3/4')
+    $$input =~ m{\G(/(?:[^\\/\n]*(?:\\.[^\\/\n]*)+?)/(?:[gi])*)}gc
+      and return ( 'REGULAR_EXPRESSION', $1 );
+
+    $$input =~ /\G!==/gc  and return ( '!==', '!==' );
+    $$input =~ /\G===/gc  and return ( '===', '===' );
+    $$input =~ /\G==/gc   and return ( '==',  '==' );
+    $$input =~ /\G<=/gc   and return ( '<=',  '<=' );
+    $$input =~ /\G>=/gc   and return ( '>=',  '>=' );
+    $$input =~ /\G!=/gc   and return ( '!=',  '!=' );
+    $$input =~ /\G&&/gc   and return ( '&&',  '&&' );
+    $$input =~ /\G\|\|/gc and return ( '||',  '||' );
+
+    # TODO - Check for no LineTerminator before '++'/'--' in
+    # PostfixExpression_normal
+
+    $$input =~ /\G\+\+/gc and return ( '++', '++' );
+    $$input =~ /\G--/gc   and return ( '--', '--' );
+
+    $$input =~ /\G>>>=/gc and return ( '>>>=', '>>>=' );
+    $$input =~ /\G>>>/gc  and return ( '>>>',  '>>>' );
+    $$input =~ /\G<<=/gc  and return ( '<<=',  '<<=' );
+    $$input =~ /\G<</gc   and return ( '<<',   '<<' );
+    $$input =~ /\G>>=/gc  and return ( '>>=',  '>>=' );
+    $$input =~ /\G>>/gc   and return ( '>>',   '>>' );
+    $$input =~ /\G\+=/gc  and return ( '+=',   '+=' );
+    $$input =~ /\G-=/gc   and return ( '-=',   '-=' );
+    $$input =~ /\G\*=/gc  and return ( '*=',   '*=' );
+    $$input =~ /\G\/=/gc  and return ( '/=',   '/=' );
+    $$input =~ /\G&=/gc   and return ( '&=',   '&=' );
+    $$input =~ /\G\|=/gc  and return ( '|=',   '|=' );
+    $$input =~ /\G\^=/gc  and return ( '^=',   '^=' );
+    $$input =~ /\G%=/gc   and return ( '%=',   '%=' );
+    $$input =~ /\G=/gc    and return ( '=',    '=' );
+    $$input =~ /\G>/gc    and return ( '>',    '>' );
+    $$input =~ /\G</gc    and return ( '<',    '<' );
+    $$input =~ /\G,/gc    and return ( ',',    ',' );
+    $$input =~ /\G!/gc    and return ( '!',    '!' );
+    $$input =~ /\G~/gc    and return ( '~',    '~' );
+    $$input =~ /\G\?/gc   and return ( '?',    '?' );
+    $$input =~ /\G:/gc    and return ( ':',    ':' );
+    $$input =~ /\G\./gc   and return ( '.',    '.' );
+    $$input =~ /\G\+/gc   and return ( '+',    '+' );
+    $$input =~ /\G-/gc    and return ( '-',    '-' );
+    $$input =~ /\G\*/gc   and return ( '*',    '*' );
+    $$input =~ /\G\//gc   and return ( '/',    '/' );
+    $$input =~ /\G&/gc    and return ( '&',    '&' );
+    $$input =~ /\G\|/gc   and return ( '|',    '|' );
+    $$input =~ /\G\^/gc   and return ( '^',    '^' );
+    $$input =~ /\G%/gc    and return ( '%',    '%' );
+    $$input =~ /\G\(/gc   and return ( '(',    '(' );
+    $$input =~ /\G\)/gc   and return ( ')',    ')' );
+    $$input =~ /\G\{/gc   and return ( '{',    '}' );
+    $$input =~ /\G\}/gc   and return ( '}',    '{' );
+    $$input =~ /\G\[/gc   and return ( '[',    '[' );
+    $$input =~ /\G\]/gc   and return ( ']',    ']' );
+    $$input =~ /\G;/gc    and return ( ';',    ';' );
+    $$input =~ /\G(.)/gcs and return ( $1, $1 );
+
+    # END_LEX
+
+}
+
+sub parse {
+    my $parser = shift;
+    $input = \$_[0];
+    pos($$input) = 0;
+    @lineno = ( 1, 1 );
+
+    $level = 0;
+
+    $parser->YYParse(
+        yylex   => \&_Lexer,
+        yyerror => \&_Error,
+        yydebug => 0
+    );
+}
+
+/* vi:set syn=yacc: */

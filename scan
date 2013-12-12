@@ -1,0 +1,8 @@
+#!/usr/bin/env zsh
+#
+#   Useful info about current location in filesystem
+#
+pwd;
+ls -ld .;
+ls -lh --color=always;
+file *;

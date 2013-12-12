@@ -1,0 +1,12 @@
+#!/usr/bin/env zsh
+#   Start writing a new executable script
+#
+
+if [[ -z $1 ]] then
+    echo "USAGE:    mkprog <script name>"
+    exit
+fi
+
+touch $1
+chmod +x $1
+vim $1

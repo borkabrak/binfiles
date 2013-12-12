@@ -1,0 +1,38 @@
+#!/usr/bin/env ruby
+#
+# Print output as if someone was typing it.
+#
+#   * random short intervals between characters
+#   
+#   I have no idea why this seems so neat to me.
+#   Try piping the output of w3m -dump to it.  
+#
+#   -jdc 2013-06-20
+
+trap 'INT', 'SYSTEM_DEFAULT' # ^C exits.
+
+speed = ARGV.length > 0 ? ARGV[0].to_i : 3
+lastchar = ''
+STDIN.read.split(//).each do |char|
+
+    print char
+
+    # Normal delay
+    sleep (rand / speed) + 0.05
+
+    # Occasional pauses between words
+    if ( (char != ' ') and
+        (lastchar == ' ') and
+        (rand(5) == 0) )
+
+        # Sometimes the pause is long
+        if (rand(5) == 0)
+            sleep 16 / speed
+        else 
+            sleep 4 / speed
+        end
+
+    end
+
+    lastchar = char
+end

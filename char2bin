@@ -1,0 +1,7 @@
+#!/usr/bin/env ruby
+#   Input: an ascii character
+#   Output: the corresponding binary encoding 
+
+ARGV[0].split(//).each do |c|
+    puts "#{c} => #{c.ord.to_s(2)}"
+end

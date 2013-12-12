@@ -1,0 +1,16 @@
+#!/usr/bin/env node
+
+// Guess a random number
+require("./jclib");
+var prompt = require("prompt");
+var max = 10;
+var n = Math.random(1,max);
+
+console.log("Guess a number between 1 and %s: ",max);
+/*
+prompt.get(['guess'], function(err, result) {
+    console.log("Guess: %s",result.guess);
+});
+*/
+
+Math.seq(1,100,2).forEach(function(x){console.log(x)});

@@ -1,0 +1,9 @@
+#!/usr/bin/zsh
+
+clear;
+while [ 1 ];
+do
+    fortune $@;
+    print "━━━ [Enter for more.  ^C to quit. ] ━━━━━━━━━━━━━━━━━\n";
+    read;
+done;

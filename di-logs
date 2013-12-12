@@ -1,0 +1,10 @@
+#!/usr/bin/env zsh
+#
+#   Show most recent commit messages from both repos
+
+count=$1 || 1
+echo "━━━━━━━━━━ $tfs ━━━━━━━━━━"
+cd $tfs && git lg -$count
+
+echo "━━━━━━━━━━ $iis ━━━━━━━━━━"
+cd $iis && git lg -$count

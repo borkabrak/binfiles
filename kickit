@@ -1,0 +1,6 @@
+#!/usr/bin/env zsh
+#
+# restart the lighttpd web server
+
+net stop lighttpd
+net start lighttpd

@@ -1,0 +1,6 @@
+#!/usr/bin/env zsh
+#   grep files quickly, excluding third-party libraries and such
+
+term=$1;
+shift;
+grep -Inr $term * --exclude jquery.js --exclude raphael.js --exclude cufon.js $*

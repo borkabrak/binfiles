@@ -1,0 +1,26 @@
+#!/usr/bin/env ruby
+
+#   A neat trick for swapping two variables without using a temporary variable.
+#
+#   More info at: http://en.wikipedia.org/wiki/XOR_swap_algorithm
+
+def showvars(x,y)
+    "x = #{x}\ny = #{y}"
+end
+
+puts "How to swap two values without a temporary variable:"
+print "x = "
+x = gets.chomp.to_i
+
+print "y = "
+y = gets.chomp.to_i
+
+showvars(x,y)
+puts
+puts "  x = x + y    (#{x} + #{y} = #{x = x + y})"
+puts
+puts "  y = x - y    (#{y} - #{x} = #{y = x - y})"
+puts
+puts "  x = x - y    (#{x} - #{y} = #{x = x - y})"
+puts
+puts showvars(x,y)

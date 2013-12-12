@@ -1,0 +1,60 @@
+#!/usr/bin/env zsh
+#
+# Interface script for a remote site
+#
+
+user='borkabrak'
+host='borkabrak.org'
+remote_path='~/borkabrak.org'
+
+function run () {
+  exec $@
+}
+
+function usage() {
+  cat <<END
+  USAGE:
+
+    borg [<command> <file>]
+
+    With no command, connect to $user@$host via ssh
+
+    COMMANDS:
+
+      * 'up' <file>    : upload <file> from $user@$host:$remote_path via scp
+      * 'down' <file>  : download <file> to current directory via scp
+
+    Connection specifics can be set by editing the script.
+
+END
+}
+
+function error() {
+  echo "$@"
+  exit
+}
+
+if [[ -z $1 ]]; then
+  run ssh $user@$host
+fi
+
+if [[ $1 == "help" ]]; then
+  usage
+  exit
+fi
+
+if [[ $1 == "up" ]]; then
+  if [[ ! -z $2 ]]; then
+    run scp $2 $user@$host:$remote_path
+  fi
+  error "Upload what?"
+fi
+
+if [[ $1 == "down" ]]; then
+  if [[ ! -z $2 ]]; then
+    run scp $user@$host:$remote_path/$2 .
+  fi
+  error "Download what?"
+fi
+
+error "Unknown command '$1'"
