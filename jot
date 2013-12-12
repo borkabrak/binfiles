@@ -17,4 +17,4 @@
 jotfile="$HOME/jot/$(date +%F).txt"
 
 # Timestamp each jot
-echo "$(date +%r): $*" >> $jotfile
+echo "$(date +%r):$(pwd): $*" >> $jotfile
