@@ -29,6 +29,13 @@ fi
 
 # Different file each day
 jotfile="$HOME/jot/$(date +%F).txt"
+
+# If no params, show last few entries
+if [[ $ARGC == 0 ]] then
+    tail $jotfile
+    exit;
+fi
+
 entry="$(date +%r):$(pwd): $*" 
 
 # Also add timestamp and working dir.
