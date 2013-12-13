@@ -1,20 +1,35 @@
 #!/usr/bin/env zsh
 #
-#   Quickly and easily record notes
+# Quickly and easily record notes
 #
-#   USAGE: jot <whatever>
+# USAGE: jot <whatever>
 #
-#   Records <whatever> in a file, named after today, with each entry
-#   time-stamped.  Can be a good way to keep track of what you spent your time
-#   on, your path through a problem, etc.
+# Records <whatever> in a file, along with timestamps and working dir.  Can be
+# a good way to keep track of what you spent your time on, your path through a
+# problem, etc.
 #
-#   Credit for the idea goes to jamesbritt at HN:
-#       https://news.ycombinator.com/item?id=6897425
+# Credit for the idea goes to jamesbritt at HN:
+# https://news.ycombinator.com/item?id=6897425
 #
-#   Blame for the implementation is mine.  :)
+# Blame for the implementation is mine.  :)
+#
+# Jon Carter borkabrak@gmail.com
+#
+# TODO: 
+#   Options to:
+#   * Take a 'topic' and categorize by that.
+#   * Review last few entries. (tail $jotfile)
+
+jotdir="$HOME/jot";
+
+# If directory does not exist, create it.
+if [[ ! -d $jotdir ]] then
+    mkdir $jotdir
+fi
 
 # Different file each day
 jotfile="$HOME/jot/$(date +%F).txt"
+entry="$(date +%r):$(pwd): $*" 
 
-# Timestamp each jot
-echo "$(date +%r):$(pwd): $*" >> $jotfile
+# Also add timestamp and working dir.
+echo $entry >> $jotfile
