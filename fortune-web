@@ -2,6 +2,8 @@
 #
 #   Show a random fortune using an online API.
 #
+#   An argument is passed along to the URL. 
+#
 #   More info at: http://iheartquotes.com/api
 #
 #   Requires:
@@ -10,4 +12,6 @@
 #       * w3m
 #       * perl
 
-curl http://iheartquotes.com/api/v1/random 2> /dev/null | w3m -dump -T text/html | perl -pe 's/http:.*$//m'
+url="http://iheartquotes.com/api/v1/random?$1"
+
+curl $url 2> /dev/null | w3m -dump -T text/html
