@@ -1,0 +1,8 @@
+#!/usr/bin/env zsh
+#
+#   Treat the rest of the line as a command to repeat until terminated.
+
+while [ 1 ]; do
+    $*;
+    read;
+done
