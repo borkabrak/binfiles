@@ -1,0 +1,13 @@
+#!/usr/bin/env zsh
+#
+#   Show a random fortune using an online API.
+#
+#   More info at: http://iheartquotes.com/api
+#
+#   Requires:
+#       * Internet
+#       * curl
+#       * w3m
+#       * perl
+
+curl http://iheartquotes.com/api/v1/random 2> /dev/null | w3m -dump -T text/html | perl -pe 's/http:.*$//m'
