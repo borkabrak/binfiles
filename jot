@@ -18,7 +18,8 @@
 # TODO: 
 #   Options to:
 #   * Take a 'topic' and categorize by that.
-#   * Review last few entries. (tail $jotfile)
+#   * When listing last few entries, select most recent file to use (as it
+#     might not be today's)
 
 jotdir="$HOME/jot";
 
