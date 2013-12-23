@@ -23,6 +23,14 @@
 
 jotdir="$HOME/jot";
 
+# If no params, show last few entries
+if [[ $ARGC == 0 ]] then
+    pushd -q $jotdir
+    grep -H . *(n) | tail -5
+    popd -q
+    exit;
+fi
+
 # If directory does not exist, create it.
 if [[ ! -d $jotdir ]] then
     mkdir $jotdir
@@ -30,12 +38,6 @@ fi
 
 # Different file each day
 jotfile="$HOME/jot/$(date +%F).txt"
-
-# If no params, show last few entries
-if [[ $ARGC == 0 ]] then
-    tail $jotfile
-    exit;
-fi
 
 entry="$(date +%r):$(pwd): $*" 
 
