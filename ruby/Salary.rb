@@ -38,7 +38,7 @@ class Salary
         "\t$%i/yr\n" % self.net +
         "\t$%.2f/hr\n" % self.hour +
         "\t$%.2f/mo\n" % self.month +
-        "\t$%.2f/2wk\n" % self.biweek
+        "\t$%.2f/2wks\n" % self.biweek
 
     end
 
