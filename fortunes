@@ -1,9 +1,9 @@
 #!/usr/bin/zsh
 
 clear;
-while [ 1 ];
+while [[ $command != "q" ]];
 do
     fortune $@;
-    print "━━━ [Enter for more.  ^C to quit. ] ━━━━━━━━━━━━━━━━━\n";
-    read;
+    print "━━━ [Enter for more.  'q' or ^C to quit. ] ━━━━━━━━━━━━━━━━━\n";
+    read command;
 done;
