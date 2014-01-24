@@ -2,9 +2,9 @@
 #
 # Quickly and easily record notes
 #
-# USAGE: jot <whatever>
+# USAGE: jot [<string>]
 #
-# Records <whatever> in a file, along with timestamps and working dir.  Can be
+# Records <string> in a file, along with timestamps and working dir.  Can be
 # a good way to keep track of what you spent your time on, your path through a
 # problem, etc.
 #
@@ -18,8 +18,6 @@
 # TODO: 
 #   Options to:
 #   * Take a 'topic' and categorize by that.
-#   * When listing last few entries, select most recent file to use (as it
-#     might not be today's)
 
 jotdir="$HOME/jot";
 
