@@ -1,0 +1,17 @@
+#!/usr/bin/env zsh
+#
+#   Create a new <whatever>
+
+command=$1; shift
+
+case "$command" in
+    
+    html)
+        echo "Making html"
+        vim -s ~/.vim/jdc/new_html
+        ;;
+
+    *)
+        echo "Unknown command '$command'"
+        ;;
+esac

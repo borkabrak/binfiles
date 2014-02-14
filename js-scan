@@ -1,0 +1,14 @@
+#!/usr/bin/env zsh
+#
+#   Output filenames and line numbers of functions added to a javascript
+#   object's prototype in a given file.
+
+if [[ -z $1 ]] then
+    echo "No filename given";
+    exit;
+fi;
+    
+filename=$1;
+echo "Prototype functions in $filename:"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━";
+grep -noP "prototype.*?function" $filename | sed 's/prototype.\(.*\) = function/\1/' | less

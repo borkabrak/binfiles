@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+/* 
 String.prototype.is_palindrome = function(){
     // All strings of one or zero chars are palindromes
     if (this.length < 2) return true;
@@ -10,16 +11,32 @@ String.prototype.is_palindrome = function(){
         this.slice(1,this.length - 1).is_palindrome() :
         false;
 }
+*/
+
+String.prototype.is_palindrome = function() {
+    var str = this.toLowerCase().replace(/[^a-z]/g,""); // Ignore case and all non-letters
+    return str === str.reverse();
+}
+
+String.prototype.is_palindrome2 = function() {
+}
+
+String.prototype.reverse = function() {
+    return (this.length < 2) ? this.toString() : this.slice(1).reverse() + this[0];
+}
 
 var strings = [
     "",
     "a",
     "radar",
+    "Radar",
     "radarx",
     "reddit",
-    "madamimadam"
+    "madamimadam",
+    "Madam, I'm Adam"
 ];
 
+console.log("PALINDROME?");
 strings.forEach(function(str){
-    console.log("'%s' is%s a palindrome",str, str.is_palindrome() ? "" : " NOT");
+    console.log("'%s': %s", str, str.is_palindrome() ? "YES" : "NO");
 });

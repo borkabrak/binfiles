@@ -1,7 +1,13 @@
 #!/usr/bin/env zsh
 #
-#   Treat the rest of the line as a command to repeat until terminated.
+#   Treat the rest of the line as a command to repeat, waiting for input, until terminated.
+#
+#   TODO: Take an option to have it repeat every <n> seconds withOUT waiting for input?
 
+zparseopts -a myopts -binary
+echo "Arguments: $*"
+echo "Options: $myopts"
+exit;
 while [ 1 ]; do
     $*;
     read;
