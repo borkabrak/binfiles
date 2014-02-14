@@ -25,7 +25,9 @@ jotdir="$HOME/jot";
 
 # If no params, show last few entries
 if [[ $ARGC == 0 ]] then
-    pushd -q ~/jot; grep -H "." *(n) | tail -5; popd -q
+    pushd -q $jotdir
+    grep -H . *(n) | tail -5
+    popd -q
     exit;
 fi
 
