@@ -16,6 +16,7 @@ class Salary
         @year = year.to_i
     end
 
+    # Net yearly income
     def net
         @year - (@year * @@tax_percentage) - @@insurance - @@child_support
     end
@@ -32,13 +33,19 @@ class Salary
         self.net / 26
     end
 
+    def week
+        # Assuming 2 weeks unpaid vacation
+        self.net / 50
+    end
+
     def to_s
         "\n━━ $#{@year}/yr ($#{@year / 2000.0}/hr) ━━\n" +
         "Net:\n" + 
         "\t$%i/yr\n" % self.net +
         "\t$%.2f/hr\n" % self.hour +
         "\t$%.2f/mo\n" % self.month +
-        "\t$%.2f/2wk\n" % self.biweek
+        "\t$%.2f/2wks\n" % self.biweek + 
+        "\t$%.2f/wk\n" % self.week
 
     end
 

@@ -8,6 +8,51 @@
 
 // String
 //==============================================================================
+String.prototype.wrap2array = function(max_length) {
+    // Wrap string to <max_length>
+    //
+    // Return an array of strings, each no longer than max_length
+    //
+    // * Break in the middle of a word if we have to -- prioritize remaining under max width
+
+    max_length = max_length || 78;
+
+    var lines = [];
+    var current_line = "";
+
+    this.split(/\s+/).forEach(function(word) {
+        if (word.length > max_length) {
+            lines.push(word.split(/.{max_length}/));
+        } else if (current_line.length + word.length > max_length && current_line !== "") {
+            lines.push(current_line.slice(0,-1));
+            current_line = "";
+        };
+        current_line += word + " ";
+    });
+    lines.push(current_line);
+    return lines;
+}
+
+///
+// Write my own version of sprintf?
+///
+
+String.prototype.wrap = function(max_length, newline) {
+    // Wrap string to <max_length>, breaking only on spaces.  Return the
+    // string, with <newline>s (default "\n") interpolated where appropriate.
+
+    max_length = max_length || 78;
+    newline = newline || "\n";
+
+    var new_string = "";
+    this.split(/\s+/).forEach(function(word) {
+        console.log("word:%s", word);
+        var line_length = new_string.split(newline).slice(-1)[0].length // distance from last newline to end
+        new_string += word + (line_length + word.length > max_length  ? newline : " ");
+    });
+    return new_string.slice(0,-1);
+}
+
 String.prototype.reverse = function(){
     //Another way to reverse a string is to use Array's reverse:
     //  "this.split('').reverse().join('')"; 

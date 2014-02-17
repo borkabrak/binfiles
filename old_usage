@@ -1,0 +1,9 @@
+#!/usr/bin/env zsh
+
+# Show comprehensive directory size and drive usage
+
+echo "Using current directory.."
+ls -lLh --sort=size --color
+echo -n "Total disk usage of '$(pwd)' is.."
+echo "[ $(du -hLs .) ]"
+df -h .
