@@ -1,3 +1,7 @@
 # CAREFUL WHAT YOU PUT HERE
+#
+#   Lines beginning with a hash are ignored (VERY FIRST CHARACTER)
+#
+#   All other lines are run as shell commands (TAKE THIS OUT, YOU IDIOT)
 ls -l
 env
