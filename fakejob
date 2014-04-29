@@ -1,0 +1,17 @@
+#!/usr/bin/env ruby
+#
+# Proactively leverage frangible downtime allowing to simulate synergistic
+# productivity 
+#
+# ..(look busy)
+
+actions = File.read("actions.txt").split("\n");
+
+actions = actions.select {|e|  e.match(/^[^#]/) };
+puts actions.inspect
+exit;
+
+while true do
+    system actions[rand actions.length]
+    sleep( (rand(10) * 0.1) + 0.5 )
+end

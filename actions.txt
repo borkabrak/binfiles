@@ -1,0 +1,3 @@
+# CAREFUL WHAT YOU PUT HERE
+ls -l
+env
