@@ -4,10 +4,6 @@
 #
 #   TODO: Take an option to have it repeat every <n> seconds withOUT waiting for input?
 
-zparseopts -a myopts -binary
-echo "Arguments: $*"
-echo "Options: $myopts"
-exit;
 while [ 1 ]; do
     $*;
     read;
