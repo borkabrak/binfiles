@@ -1,0 +1,28 @@
+#!/usr/bin/env ruby
+#
+#   Important life reminder
+
+strings = [
+  "All work and no play makes Jack a dull boy.",
+  "No TV and no beer make Homer go crazy.",
+  #"Crazy?  I was crazy once.  They locked me in a rubber room.  That room drove me.. Crazy?  I was crazy once.."
+]
+
+letters = ("A".."z").to_a
+
+while true do
+  string = strings[rand strings.length]
+  string.split("").each do |l|
+
+    # Randomly print a random letter instead of the correct one
+    randnum =  rand(100)
+    l = letters[rand(letters.length)] if randnum > 95
+
+    print l
+
+    # Randomly delay (or speed up) typing speed.
+    sleep rand * 0.5
+  end
+  puts
+  sleep 0.5
+end
