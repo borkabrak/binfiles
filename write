@@ -1,14 +1,15 @@
 #!/usr/bin/env zsh
 #
-# Start writing.  Open today's file.   
+# Start writing.
+writedir=~/Documents/write
 
 if [[ ! -z $1 ]]; then
   filename=$1
 else
+  # If not specified, open today's file.   
   filename=$(date +%F).txt
 fi
 
-writedir=~/write
 if [[ ! -d $writedir ]]; then
   echo "$writedir does not exist"
   exit;

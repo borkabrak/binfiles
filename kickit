@@ -1,6 +1,12 @@
 #!/usr/bin/env zsh
 #
-# restart the lighttpd web server
 
-net stop lighttpd
-net start lighttpd
+# ZSNES hangs the whole damn desktop.  Restart the whole mess
+#
+echo "Killing zsnes.."
+kill -9 $(pgrep zsnes | grep -v grep | head -1)
+echo "Done"
+
+echo "Need sudo password to restart gdm.."
+sudo service gdm restart
+echo "Restarting gdm.."

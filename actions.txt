@@ -1,7 +1,9 @@
 # CAREFUL WHAT YOU PUT HERE
 #
-#   Lines beginning with a hash are ignored (VERY FIRST CHARACTER)
+#   Lines beginning with a hash and blank lines are ignored
 #
 #   All other lines are run as shell commands (TAKE THIS OUT, YOU IDIOT)
+   
 ls -l
+tree
 env

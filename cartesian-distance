@@ -1,0 +1,27 @@
+#!/usr/bin/env ruby
+#
+# Calculate the difference between two points in cartesian space
+
+class Point
+
+  attr_accessor :x, :y
+
+  def initialize(text)
+    @x, @y = text.scan(/[\d.]+/).map { |x| x.to_i }
+  end
+
+  def to_s
+    "#{@x},#{@y}"
+  end
+
+  def distance(point)
+    Math.sqrt( (@x - point.x) ** 2 + (@y - point.y) ** 2)
+  end
+
+end
+
+points = ARGV.map do
+  |arg| Point.new(arg)
+end
+
+puts points[0].distance points[1]

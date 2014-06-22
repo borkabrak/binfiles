@@ -5,13 +5,22 @@
 #
 # ..(look busy)
 
-actions = File.read("actions.txt").split("\n");
+# TODO: Executing as shell commands text read in from a file?  Programmer wat r u doin programmer stahp!
+actions = File.read("actions.txt").split("\n")
 
-actions = actions.select {|e|  e.match(/^[^#]/) };
+actions = actions.reject { |e|  e.match(/^\s*#|^\s*$/) }
+
 puts actions.inspect
-exit;
+#exit;
 
+# You'll have to Ctrl-C to get outta this..
 while true do
+
+    # Execute a random action
     system actions[rand actions.length]
-    sleep( (rand(10) * 0.1) + 0.5 )
+
+    # Sleep for a short random period.
+    sleep (rand(10) * 0.1) + 0.5
+
 end
+
