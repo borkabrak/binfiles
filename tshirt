@@ -3,5 +3,7 @@
 # File away a tshirt idea
 #   USAGE: tshirt <filename> <text>
 #       Example - tshirt coolidea "This is a cool idea for a tshirt"
+#
+#       TODO: Save all ideas in one file
 
-echo $2 > ~/tshirts/$1
+echo "$2" > ~/tshirts/$1
