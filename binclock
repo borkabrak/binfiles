@@ -4,6 +4,7 @@
 # minutes since the day began at midnight (0..1440)
 #
 # Why?  I really don't know what to say to that..
+#
 
 t = Time.new
 
