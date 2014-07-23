@@ -1,11 +1,14 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env ruby
 #
-#   TRY `du -sm * | sort -rn` instead!
+#   Try `du -sm * | sort -rn` instead!
 #
 # See disk usage of everything in the current directory, sorted by size and human readable.
 #   -I had to roll my own 'human-readable' here -- it's just MB
 #
-#   -..And then it seems `du` has a '-m' option, making the solution just a pipe
-#   through sort -rn, instead of this hack.  Nothing new under the sun..
+#du -s * | sort -rn | perl -pe '($s) = /(\d+)/; printf(qq(%3dM\t), int($s / 1024))'
 
-du -s * | sort -rn | perl -pe '($s) = /(\d+)/;printf(qq(%3dM\t), int($s / 1024))'
+output = `du -sc * | sort -rn`
+
+output.split('\n').each do |line|
+  puts line.sub(/(\d+)\s/, "xxx ") 
+end
