@@ -4,15 +4,15 @@
 #   system's fortune collection
 #
 
-my_fortune_file='jdc-at-str'
+my_fortune_file="$HOME/documents/write/jdc-fortunes"
 
 cd ~/SpiderOak-Hive/fortunes
 # Edit the file
 vim $my_fortune_file;
 
 # Convert it to a form fortune expects
-/usr/sbin/strfile.exe $my_fortune_file;
+strfile $my_fortune_file;
 
 # And copy both to the dir where fortune expects to find it.
-cp -v $my_fortune_file* /usr/share/games/fortunes
-
+echo "Adding '$my_fortune_file' to system fortunes.."
+sudo cp -v $my_fortune_file* /usr/share/games/fortunes
