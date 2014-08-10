@@ -1,7 +1,7 @@
 #!/usr/bin/env zsh
 #
 # Start writing.
-writedir=~/Documents/write
+writedir=~/documents/write
 
 if [[ ! -z $1 ]]; then
   filename=$1
