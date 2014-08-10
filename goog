@@ -1,2 +1,2 @@
 #!/usr/bin/env zsh
-"/cygdrive/c/Program Files (x86)/Google/Chrome/Application/chrome.exe" http://www.google.com/#q=\'$*\'
+www-browser "http://www.google.com/search?q=$*"
