@@ -258,6 +258,8 @@ Math.seq = function(x, y, step){
 
 Math.is_prime = function(x){
     // This is quite a straightforward algorithm, but it's inefficient
+    // TODO: Improve this with the 6k ± 1 rule (wikipedia article on primality
+    // tests has more info)
     for (var i=2;i <= Math.sqrt(x); i++){
         if (x % i === 0) return false;
     }
@@ -319,7 +321,7 @@ Number.prototype.times = function(f){
         decimal notation, parentheses must be used when calling this on a
         literal Number.
         
-        For example,:
+        For example:
             
             10.times(function(n){ console.log("n:%s",n) };
 
@@ -389,7 +391,7 @@ Array.prototype.reorder = function(order){
 
 // Document (DOM)
 function restyle(selector, css_properties){
-    // Add css properties to selected elements.
+    // Add/edit css properties on selected elements.
 
     var element, elements = document.querySelectorAll(selector);
 

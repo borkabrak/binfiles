@@ -3,4 +3,4 @@
 #   Show total usage of files and directories in current directory.
 #
 
-du -s * | sort -nr
+du -ms * | sort -n

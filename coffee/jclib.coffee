@@ -18,7 +18,6 @@ String::pad = (len = 0, character = "0") ->
         (@ + character).pad(len, character)
 
 
-
 # I like this part.  These list comprehensions are kickity:
 console.log s for s in [
 
@@ -37,3 +36,6 @@ console.log s for s in [
     "racecar"
     "Coffeescript is.. actually pretty badass"
 ]
+
+# Here's a neat way to define the factorial function..
+fact = (n)-> [1..n].reduce (x,y)->x*y

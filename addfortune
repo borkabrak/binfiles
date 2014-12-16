@@ -6,13 +6,13 @@
 
 my_fortune_file="$HOME/documents/write/jdc-fortunes"
 
-cd ~/SpiderOak-Hive/fortunes
+cd /home/jon/documents/write
 # Edit the file
-vim $my_fortune_file;
+vim -c "execute 'normal Go%O'" $my_fortune_file;
 
 # Convert it to a form fortune expects
 strfile $my_fortune_file;
 
 # And copy both to the dir where fortune expects to find it.
-echo "Adding '$my_fortune_file' to system fortunes.."
+echo "Adding '$my_fortune_file' to system fortunes.. (requires sudo password)"
 sudo cp -v $my_fortune_file* /usr/share/games/fortunes

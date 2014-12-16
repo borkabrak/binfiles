@@ -1,0 +1,6 @@
+#!/usr/bin/env zsh
+#
+#   Show total usage of current filesystem
+#
+
+df -h .
