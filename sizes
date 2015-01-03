@@ -23,12 +23,12 @@ du -s *(D) |
 sort -rn |
 
 perl -ne '
-  BEGIN 
-  {{ 
-    # Print a header line
+
+  # Print a header line
+  BEGIN { 
     printf "     Bytes     MB     GB  Filename\n";
     print "-" x 50; print "\n";
-  }}
+  }
 
   # Grab the size explicitly and allow the rest of the line to be the filename, spaces and all
   ($b, $f) = (/(\d+)\s+(.*)/);   
