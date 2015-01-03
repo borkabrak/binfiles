@@ -2,6 +2,11 @@
 #
 # Print a sorted table of file/dir disk usages in various units
 #
+# Dependencies:
+#   * zsh
+#   * perl
+#   * du
+#   * sort
 
 if [[ $1 =~ '--help|-h' ]]; then
   echo "USAGE: $0 [target directory]     # optional: defaults to CWD"
@@ -13,6 +18,7 @@ if [[ $# -gt 0 ]]; then
   cd $1;
 fi;
 
+# Get sorted sizes by bytes
 du -s *(D) |
 sort -rn |
 
