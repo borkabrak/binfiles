@@ -1,0 +1,33 @@
+#!/usr/bin/env zsh
+#
+# Print a sorted table of file/dir disk usages in various units
+#
+
+if [[ $1 =~ '--help|-h' ]]; then
+  echo "USAGE: $0 [target directory]     # optional: defaults to CWD"
+  exit;
+fi;
+
+# Switch to target directory
+if [[ $# -gt 0 ]]; then
+  cd $1;
+fi;
+
+du -s *(D) |
+sort -rn |
+
+perl -ne '
+  BEGIN 
+  {{ 
+    # Print a header line
+    printf "     Bytes     MB     GB  Filename\n";
+    print "-" x 50; print "\n";
+  }}
+
+  # Grab the size explicitly and allow the rest of the line to be the filename, spaces and all
+  ($b, $f) = (/(\d+)\s+(.*)/);   
+
+  # Calculate units and format output
+  ($g, $m) = ($b / 1024 / 1024, $b / 1024);
+  printf("%10.0f  %5.0f  %5.1f  %s\n", $b, $m, $g, $f)
+'
