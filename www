@@ -1,0 +1,12 @@
+#!/usr/bin/env zsh
+#
+#   Shortcuts for pulling things up in a terminal browser
+
+# Pick a browser (cute, right?)
+if (( $+commands[www-browser] )) ; then
+    browser_command="www-browser"
+else
+    browser_command="w3m"
+fi
+
+echo $browser_command "http://www.google.com/search?q=$*"
