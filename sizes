@@ -28,7 +28,7 @@ perl -ne '
 
   # Print a header line
   BEGIN { 
-    printf "     Bytes     MB     GB  Filename\n";
+    printf "     KB     MB     GB  Filename\n";
     print "-" x 50; print "\n";
   }
 
@@ -37,5 +37,5 @@ perl -ne '
 
   # Calculate units and format output
   ($g, $m) = ($b / 1024 / 1024, $b / 1024);
-  printf("%10.0f  %5.0f  %5.1f  %s\n", $b, $m, $g, $f)
+  printf("%7.0f  %5.0f  %5.1f  %s\n", $b, $m, $g, $f)
 '
