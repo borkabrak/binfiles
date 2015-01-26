@@ -16,7 +16,7 @@ while true do
 
     # Randomly print a random letter instead of the correct one
     randnum =  rand(100)
-    l = letters[rand(letters.length)] if randnum > 95
+    l = letters[rand(letters.length)] if randnum > 97
 
     print l
 
