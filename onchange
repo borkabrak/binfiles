@@ -1,0 +1,34 @@
+#!/usr/bin/env zsh
+#
+#    $0: Do something when files change
+#
+#    Some of this was inspired by the article:
+#
+#       https://exyr.org/2011/inotify-run/ (2015-04-16)
+
+function usage(){
+cat <<END
+    $0: Do something when files change
+
+    USAGE: $0 <file> <command>
+END
+}
+
+if [[ $# -lt 1 ]]; then
+    usage
+    exit;
+fi
+
+file=$1
+shift;
+cmd="$@"
+
+echo "Cmd:'$cmd'"
+
+FORMAT=$(echo -e "\033[1;33m%w%f\033[0m:%e")
+while inotifywait -qe CLOSE_WRITE --format "$FORMAT" $file
+do
+    if [[ -n "$cmd" ]]; then
+        $cmd
+    fi
+done

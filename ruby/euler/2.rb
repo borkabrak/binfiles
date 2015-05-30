@@ -1,24 +1,18 @@
 #!/usr/bin/env ruby
-# Find the sum of all even Fibonacci numbers up to 4 million
+#
+# Find the sum of all even Fibonacci numbers less than or equal to four million
 
-# current number
-curr = 1
+prev = 1
+current = 2
+sum = 2
 
-# previous number
-prev = 0
+while current < 4000000 do
+ 
+  x = prev + current
+  prev = current
+  current = x
 
-# accumulator
-sum = 0
-
-while (curr < 4000000) do
-
-    temp = curr
-    curr = prev + curr
-    prev = temp
-
-    if (curr % 2 == 0) then
-        sum += curr
-    end
+  sum += (current.even? ? current : 0)
 end
 
 puts sum

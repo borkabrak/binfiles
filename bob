@@ -1,0 +1,41 @@
+#!/usr/bin/env ruby
+#
+#   Bob - a personality for my computer
+
+class Voice
+  def initialize
+    @command = "espeak -v m4 -s 140 -p 25"
+  end
+
+  def say(text)
+    # say a specific thing
+    system %{#{@command} "#{text}"}
+  end
+
+  def read(command)
+    # read output of a command
+    self.say "$(#{command})"
+  end
+
+  def fortune
+    self.read "fortune -sn 100"
+  end
+
+end
+
+bob = Voice.new
+
+subcommand = ARGV.shift
+
+puts 'subcommand: #{subcommand}'
+case subcommand.to_sym
+when :say
+  bob.say ARGV
+
+when :fortune
+  bob.fortune
+
+end
+
+#bob.say "Greetings, sir.  What can I do for you?"
+#bob.fortune

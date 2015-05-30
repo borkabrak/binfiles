@@ -1,0 +1,101 @@
+#!/usr/bin/env ruby
+#
+#   Tic-tac-toe
+#   -jdc
+
+class TicTacToe
+
+  attr_accessor :state
+
+  def initialize
+    @state = Array.new(9) {" "}
+  end
+
+  def show(state=@state)
+    # Show the current state of the game.
+    #
+    # This can be passed an array to show instead.  For example, pass it an
+    # array of 9 digits, and it will fill the board with those values instead
+    # (perhaps for indicating a numbering scheme for the squares.)
+    
+    return <<-END
+
+       #{state[0]} | #{state[1]} | #{state[2]}
+      -----------
+       #{state[3]} | #{state[4]} | #{state[5]}
+      -----------
+       #{state[6]} | #{state[7]} | #{state[8]}
+       
+    END
+  end
+
+  def mark(location, player)
+    return nil if location.to_i < 1
+    location = location.to_i - 1
+    if @state[location] != " " then 
+      puts "That square is already taken."
+      return
+    end
+    @state[location] = player
+  end
+
+  def winner
+    # Return the winner (The character that has three in a row, or cat, or nil
+    # if no winner yet)
+    
+    # Check for a real winner
+    winner = nil
+    def check(squares)
+      # Get the set of values in the squares we're checking
+      set = [ @state[squares[0]], @state[squares[1]], @state[squares[2]] ]
+      # No win if any are blank
+      return nil if set.include?(" ")
+      # Yes win if they all match -- return the value
+      return set[0] if set.uniq.length == 1
+    end
+
+    # Enumerated win conditions requires a 3x3 board
+    [[0,1,2],
+     [3,4,5],
+     [6,7,8],
+     [0,3,6],
+     [1,4,7],
+     [2,5,8],
+     [0,4,8],
+     [2,4,6]].each do |set|
+       if check(set) then
+         return check(set)
+       end
+     end
+
+    return winner if winner
+
+    # "Cat" wins if there are no more possible moves
+    return "cat" if @state.count(" ") == 0
+
+    # No winner yet
+    nil
+
+  end
+
+end
+
+## game logic
+game = TicTacToe.new
+player = "X"
+while (!game.winner) do
+
+  system "clear"
+  puts "Use these numbers:"
+  puts game.show((1..9).to_a)
+  puts "Player '#{player}': " # Prompt for a move
+  puts game.show  # Show the board
+
+  if game.mark(gets, player) then
+    player = (player == "X" ? "O" : "X")  # Toggle player
+  end
+
+end
+
+puts game.show
+puts "#{game.winner ? game.winner : "Nobody"} wins!"

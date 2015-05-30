@@ -1,0 +1,30 @@
+#!/usr/bin/env zsh
+#
+#   A script to manage common podcast-oriented operations
+#
+
+# Config
+
+# Device mountpoint
+device_mountpoint=/media/C6A6-1BEB
+
+# Path on the device where podcasts are stored
+device_path=/Audio
+
+podcast_location=$device_mountpoint$device_path
+#########################################################
+
+function usage(){
+echo <<END
+    USAGE:
+        $0 <command>
+
+    Commands:
+END
+}
+
+command=$1;shift;
+
+echo "AVAILABLE SPACE:"
+df -h $device_mountpoint
+sizes $podcast_location | head

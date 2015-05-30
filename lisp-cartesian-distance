@@ -1,0 +1,24 @@
+#!/usr/bin/env clisp
+
+;; Display the straight-line distance between two points in cartesian coordinates
+;;
+;; Basically, calculate the hypoteneuse, given the other two sides
+;; Tangent is opposite over adjacent
+
+(format t "ARGS: ~&~S~&" *args*)
+
+(defun square (n) (* n n))
+
+(defun x-distance args
+  (abs (- (first args) (third args))))
+
+(defun y-distance  args
+  (abs (- (second args) (fourth args))))
+
+(defun y-distance nil 4)
+
+(format t "Distance: ~A" 
+  (sqrt 
+    (+ 
+      (square (x-distance *args*)) 
+      (square (y-distance *args*)))))

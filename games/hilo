@@ -1,0 +1,18 @@
+#!/usr/bin/env ruby
+#
+#   Guess a number, with feedback higher/lower
+
+max = 100
+num = rand(max) + 1
+guess = 0
+score = 0
+puts "Guess a number from 1 to #{max}"
+while guess != num do
+  print "> "
+  guess = gets.to_i
+  score += 1
+  puts "Higher" if (guess < num)
+  puts "Lower" if (guess > num)
+end
+puts "You win!"
+puts "You got it in #{score} guesses"

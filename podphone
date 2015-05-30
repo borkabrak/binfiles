@@ -1,0 +1,15 @@
+#!/usr/bin/env zsh
+#
+#   Manage podcasts on my phone, with concern for limited disk space on the
+#   device.
+
+# Where the phone stores podcasts
+destdir=/media/C6A6-1BEB/Audio
+
+# Where are the source podcast files kept?
+sourcedir=~/
+
+command=$1;
+shift;
+
+echo $command

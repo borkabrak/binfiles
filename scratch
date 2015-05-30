@@ -1,0 +1,5 @@
+#!/usr/bin/env zsh
+#
+# Write into a global scratch file (or use jot :) )
+
+vim ~/documents/scratch.txt

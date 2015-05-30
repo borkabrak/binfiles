@@ -1,0 +1,34 @@
+#!/usr/bin/env ruby
+#
+# A tool for calculating measurements
+
+class Measurements
+
+  attr_accessor :bust, :ribs
+
+  def initialize(bust, ribs)
+    @bust = bust.to_i
+    @ribs = ribs.to_i
+  end
+
+  def bodice
+    @bust - 7
+  end
+
+  def darts
+    (@bust - @ribs) / 2.0
+  end
+
+  def show
+    puts <<-HERE
+    bust: #{@bust}
+    ribs: #{@ribs}
+    bodice: #{self.bodice}
+    darts: #{self.darts}
+    HERE
+  end
+
+end
+
+m = Measurements.new(ARGV[0], ARGV[1])
+m.show

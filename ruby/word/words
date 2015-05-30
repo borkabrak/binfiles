@@ -1,0 +1,27 @@
+#!/usr/bin/env ruby
+
+class Words
+  def initialize
+    require 'zlib'
+    wordlist = "/usr/share/dict/words"
+    connectives = "/usr/share/dict/connectives.gz"
+    @words = File.read(wordlist).split("\n")
+    @connectives = Zlib::GzipReader.open(connectives).map {|l| l[/\S+/] } 
+  end
+
+  def fetch(count = 1)
+    count.times.map {@words[rand @words.length]}.join " "
+  end
+
+  def connective(count = 1)
+    count.times.map {@connectives[rand @connectives.length]}.join " "
+  end
+
+  def build(count = 1)
+    count.times.map {"#{fetch} #{connective}"}
+  end
+
+end
+
+word = Words.new
+puts word.build 3

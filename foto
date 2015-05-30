@@ -1,0 +1,7 @@
+#!/usr/bin/env ruby
+# 
+# Manage digital photos
+
+command = $1
+
+puts "Command:#{command}"

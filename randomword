@@ -1,0 +1,5 @@
+#!/usr/bin/env zsh
+#
+#   output a random word
+wordfile=/usr/share/dict/words
+shuf -n 1 $wordfile

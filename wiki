@@ -1,0 +1,3 @@
+#!/usr/bin/env zsh
+
+www-browser "https://en.wikipedia.org/wiki/$(echo $@ | tr ' ' '_')"

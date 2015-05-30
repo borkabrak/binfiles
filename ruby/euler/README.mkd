@@ -1,0 +1,6 @@
+Project Euler Problems
+======================
+
+This is a collection of solutions to problems from [Project Euler](https://projecteuler.net/).
+
+Initially, this is just in Ruby, but I may add other languages later.

@@ -1,0 +1,6 @@
+#!/usr/bin/env zsh
+#
+#   Type the left-hand home row keys to switch between dvorak and qwerty.  This
+#   is 'asdf', the qwerty version.
+
+setxkbmap dvorak

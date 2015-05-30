@@ -1,0 +1,25 @@
+#!/usr/bin/env zsh
+#
+# Intended to be a nicer cli interface to amixer, just for setting volume
+#
+#   USAGE:
+#
+#     vol [<percentage>]
+#
+#   Example:
+#     
+#     vol 100 - set to max volume
+#
+#     vol 50 - set to half volume
+#
+#     vol - show current status of the master channel
+#
+#   TODO:
+#     Implement an unambiguous way of saying "set to this number, unless
+#     there's a +/- sign, in which case change volume by that much.
+
+if [[ -z $1 ]]; then
+  amixer get Master
+else
+  amixer set Master "$1"%
+fi

@@ -1,0 +1,21 @@
+#!/usr/bin/env zsh
+#
+#   Update a github-hosted repository demo'd on your website
+
+
+function usage() {
+cat <<END
+Update a git repo on borkabrak.org
+
+    USAGE: $0 <reponame>
+
+END
+}
+
+if [[ $# -lt 1 ]]; then
+    usage;
+    exit;
+fi
+
+repo=$1; shift;
+ssh borkabrak@borkabrak.org "cd ~/borkabrak.org/$repo;git pull"

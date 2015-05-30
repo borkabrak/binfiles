@@ -1,0 +1,7 @@
+#!/usr/bin/env zsh
+
+# Pretty basic execution
+#java -jar ~/bin/minecraft-files/minecraft.jar
+
+# Somebody's recommendation from http://www.minecraftforum.net/topic/158692-howto-optimize-minecraft-for-linux/
+nice --20 java -Xmx1024M -Xms1024M -XX:+UseFastAccessorMethods -XX:+AggressiveOpts  -XX:+DisableExplicitGC -XX:+UseAdaptiveGCBoundary -XX:MaxGCPauseMillis=500 -XX:SurvivorRatio=16 -XX:+UseParallelGC -XX:UseSSE=3 -XX:ParallelGCThreads=2 -jar ~/bin/minecraft-files/minecraft.jar 

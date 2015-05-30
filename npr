@@ -1,0 +1,2 @@
+#!/usr/bin/env zsh
+chromium "http://nashvillepublicmedia.org/player/listen.shtml"

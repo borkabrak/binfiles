@@ -1,0 +1,32 @@
+#!/usr/bin/env zsh
+#
+#   Start writing a new script
+
+# CONFIG
+script_directory="/home/jon/bin/"
+
+function usage() {
+echo <<-END
+    $0: Start writing a new script
+
+    Usage: $0 <language> <name>
+
+END
+}
+
+# Validate params
+if [[ $# -lt 2 ]]; then
+    usage
+    exit
+fi
+ 
+language=$1
+shift
+name="$script_directory$1"
+shift
+
+touch $name
+chmod +x $name
+echo "#!/usr/bin/env $language\n# " > $name
+vim $name
+

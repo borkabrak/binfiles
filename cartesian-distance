@@ -1,10 +1,10 @@
 #!/usr/bin/env ruby
 #
 # Calculate the difference between two points in cartesian space
+require_relative "ruby/Point.rb"
 
-require_relative "Point.rb"
 points = ARGV.map do |arg| 
   Point.new(arg)
 end
 
-puts (points[0].distance points[1]).round(2)
+puts points[0].distance_to points[1]

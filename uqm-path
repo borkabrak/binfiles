@@ -1,0 +1,135 @@
+#!/usr/bin/env ruby
+# encoding: utf-8
+#
+#   In the game The Ur-Quan Masters, find the path of least fuel use from one
+#   point in space to another, assuming the ability to open portal to
+#   QuasiSpace (as far as fuel use is concerned, this means the ability to
+#   teleport to 15 specific points around the map).
+
+require_relative "ruby/Point.rb"
+
+def show_usage
+  puts <<-END
+  USAGE: #{File.basename($PROGRAM_NAME)} <start> <destination>
+
+  Start and destination points are specified something like:
+
+    100.3x900.5
+    100.3,900,5
+
+END
+end
+
+def fuel_use(distance)
+  (distance / 10).round 1
+end
+
+begin
+  start = Point.new(ARGV[0]) 
+  destination = Point.new(ARGV[1])
+rescue Point::PointError => e
+  puts e
+  show_usage
+end
+
+portals = [
+  {
+    quasi: "544x532",
+    hyper: "036.8x633.3",
+    description: "near original portal"
+  },
+  {
+    quasi: "530x528",
+    hyper: "775.2x890.6",
+    description: "top right, near Librae"
+  },
+  {
+    quasi: "520x540",
+    hyper: "584.9x621.4",
+    description: "Ur-Quan space, near Crucis"
+  },
+  {
+    quasi: "520x514",
+    hyper: "011.1x940.9",
+    description: "top left, near Vega, Beta Corvi"
+  },
+  {
+    quasi: "488x538",
+    hyper: "973.5x315.4",
+    description: "right centerish, near Pictoris"
+  },
+  {
+    quasi: "466x514",
+    hyper: "230.1x398.9",
+    description: "Spathi space"
+  },
+  {
+    quasi: "448x504",
+    hyper: "565.7x971.3",
+    description: "top center, in Lyncis"
+  },
+  {
+    quasi: "516x466",
+    hyper: "567.3x120.8",
+    description: "bottom center, near Sculptoris"
+  },
+  {
+    quasi: "506x474",
+    hyper: "190.9x092.6",
+    description: "bottom left, near Sol, Lyrae"
+  },
+  {
+    quasi: "502x460",
+    hyper: "318.3x490.6",
+    description: "center slightly left, between Spathi and ZFP"
+  },
+  {
+    quasi: "476x496",
+    hyper: "611.6x413.1",
+    description: "center slightly right, near Camelopardalis"
+  },
+  {
+    quasi: "458x492",
+    hyper: "860.7x015.1",
+    description: "bottom right, between Trianguli and Arae"
+  },
+  {
+    quasi: "492x492",
+    hyper: "005.0x164.8",
+    description: "bottomish left, center of Ilwrath space"
+  },
+  {
+    quasi: "468x464",
+    hyper: "921.0x610.4",
+    description: "topish right, near Arcturus"
+  },
+  {
+    quasi: "476x458",
+    hyper: "409.0x774.9",
+    description: "topish slightly left, near Fomalhaut"
+  }
+]
+
+# Select portal to use and the distance from it
+min = 9999
+portal = nil
+portals.each do |p|
+  distance = destination.distance_to Point.new(p[:hyper])
+  #puts "Distance from #{p[:hyper]}: #{distance}"
+  if distance < min
+    portal = p
+    min = distance
+  end
+end
+
+normal_distance = start.distance_to destination
+portal_distance = destination.distance_to Point.new(portal[:hyper])
+puts <<-END
+#{start} → #{destination}:
+Normal distance: #{normal_distance} (#{fuel_use(normal_distance)} fuel)
+  
+Closest portal: 
+  #{portal[:description].capitalize}
+Quasispace Hyperspace  Distance Fuel
+#{portal[:quasi]}    #{portal[:hyper]} #{portal_distance}   #{fuel_use(portal_distance) + 10}
+END

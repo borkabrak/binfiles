@@ -1,0 +1,62 @@
+; Lisp stuff I writed!
+; 
+; Some of this is from Paul Graham's book, ANSI Common Lisp
+; Sum numbers less than n.
+(defun sum (n)
+  (let ((s 0))
+    (dotimes (i n s)
+      (incf s i))))
+
+; ACL, Chapter 2 Exercise 7, p. 30
+;
+; Define a function that takes a list as an argument and returns true if one of
+; its elements is a list.
+; (Got it in one.  Works perfectly.  BAM!)
+(defun contains-list (lst)
+  (if (null lst)
+      nil
+    (if (listp (car lst))
+	t
+      (contains-list (cdr lst)))))
+
+;; Exercise 8
+;;
+;; Give iterative and recursive definitions of a function that
+;;
+;; (a) takes a positive integer and prints that many dots
+;;
+;; (b) takes a list and returns the number of times the symbol a occurs in it
+
+; print dots - recursive
+(defun dots-recursive (n)
+  (if (> n 0)
+    ((lambda nil (format t ".")
+    (dots-recursive (- n 1))))))
+
+; print dots - iterative
+(defun dots-iterative (n)
+  (do ((i 1 (+ i 1)))
+      ((> i n) 'done)
+    (format t ".")))
+
+; count 'a's - recursive
+(defun count-a-r (lst)
+  (if (null lst)
+      0
+    (if (equal 'a (car lst))
+	(+ 1 (count-a-r (cdr lst)))
+      (count-a-r (cdr lst)))))
+
+; count 'a's - iterative
+(defun count-a-i (lst)
+  (setq count 0)
+  (dolist (el lst)
+    (if (equal el 'a)
+	(setq count (+ count 1))))
+  count)
+
+;; Mine - return a list of numbers from start to end
+(defun range (start end)
+  (if (equal start end)
+    nil
+    (cons start (range (+ start 1) end))))

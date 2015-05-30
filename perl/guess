@@ -1,0 +1,24 @@
+#!/usr/bin/env perl
+#
+# Number-guessing game
+
+use strict;
+use 5.010;
+
+my $max = (shift or 100);
+say "Guess a number from 1 to $max.\n";
+
+my $target = int rand $max;
+
+my $turns = 1;
+
+print "First guess: ";
+my $guess = <>;
+while ($guess != $target){
+  say (($guess < $target) ? "Higher" : "Lower");
+  $turns++;
+  print "Guess: ";
+  $guess = <>;
+} 
+
+say "You got it in $turns turns!";

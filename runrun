@@ -1,0 +1,13 @@
+#!/usr/bin/env zsh
+#
+#   Run a command and re-run it when it's quit
+
+while [ 1 ]; do
+
+    # run the command
+    $@;
+
+    # Wait a bit before each restart to give us a chance to quit for real
+    sleep 1;
+
+done

@@ -1,0 +1,9 @@
+<?php
+
+$str = "9";
+for ($i = 0; $i < 30; $i++) {
+    if ($i == 32) { print "this one!\n"; }
+    print ">>" . $str++ . "<<\n";
+}
+
+?>

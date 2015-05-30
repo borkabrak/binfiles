@@ -1,0 +1,10 @@
+#!/usr/bin/env node
+//
+//  Custom REPL for node
+
+var repl = require('repl');
+
+repl.start({
+  prompt: "node >> ",
+  useColors: true,
+});

@@ -1,28 +1,37 @@
 #!/usr/bin/env ruby
-# Find the largest prime factor of 600851475143
 #
-# Edit:  This is BROKEN.  Check '26'
-# cf. The solution I did in Python (not that Python is better -- it's a
-# different algorithm)
+# Find the largest prime factor of 600851475143
 
-x = 600851475143
-lpf = 1
+number = 600851475143
 
-(2..Math.sqrt(x)).each { |n|
-    if (x % n == 0) then
-        factor = n
-        
-        # We found a factor.. is it prime?
-        prime = true
-        (2..Math.sqrt(factor)).each { |m|
-            if (factor % m == 0) then
-                prime = false
-            end
-        }
-        if (prime) then
-            puts factor 
-            lpf = factor
-        end
+class Fixnum
+
+  def prime?
+    # straightforward approach - test all numbers from 2 to sqrt(n)
+    (2..(Math.sqrt self).floor).each do |n|
+      return false if self % n == 0
     end
-}
-puts lpf
+    return true
+  end
+
+  def factors
+    (1..self).select { |n| ( self % n == 0) }
+  end
+
+end
+puts "Calculating.."
+# Nice try here, but this takes way too long.  Let's do it by hand..
+# puts number.factors.reverse.find{|n| n.prime?}
+
+number.downto(1).each do |n|
+  if (number % n == 0)
+    puts "Checking #{n} for primality.."
+    if (n.prime?)
+      puts "Found it:#{n}"
+      break
+    end
+  end
+end
+
+puts "Done"
+

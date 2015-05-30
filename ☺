@@ -1,0 +1,5 @@
+#!/usr/bin/env zsh
+#
+# A script that is much harder to run than it has any right to be.  :)
+
+echo "Hello!"

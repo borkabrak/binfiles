@@ -1,0 +1,4 @@
+#!/usr/bin/env zsh
+#
+# Show short battery status
+acpi | perl -pe 's/.*: (.*\d+%).*/\1/g'

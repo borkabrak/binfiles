@@ -1,0 +1,48 @@
+#!/usr/bin/env ruby
+#
+# Play the game "GHOST"
+
+=begin comments
+
+How to play
+===========
+
+Turns
+-----
+
+One player starts the game by choosing any letter of the alphabet.  Players
+then take turns doing one of the following:
+
+  * Optionally, challenging the letter added by the player before them
+  * Add a letter to the current word
+
+Challenges
+----------
+
+A 'challenge' is an assertion made by a player that the letter added by the
+previous player does not form a valid word.  The previous player then must
+declare a valid word that begins with the current set of letters, or fail the
+challenge and lose the round.
+
+How to lose
+-----------
+
+A player loses a round (and gains a letter of the word "GHOST") by:
+
+  * completing a word
+  * challenging a valid word
+  * being challenged without having a valid word
+
+When a player loses a round, they acquire subsequent letters of the word
+"GHOST", hence the name of the game.  When they acquire all the letters (lose
+five rounds), they are out of the game.
+
+The last player left wins!
+
+=end
+
+game = Game.new
+
+def get_players
+
+  def get_number

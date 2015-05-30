@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+#
+# Output only the integer percentage of battery charge. (e.g., if the battery
+# charge is 67%, output '67')
+
+acpi | perl -pe 's/.*?(\d+)%.*/\1/i'

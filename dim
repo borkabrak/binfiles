@@ -1,0 +1,15 @@
+#!/usr/bin/env zsh
+#
+# Manage screen brightness.  'dim' is easy to type
+
+#if [[ "$1" =~ /^(+|-)/ ]]; then
+#
+#  echo "arg is relative"
+#
+if [[ -n $1 ]]; then
+
+  xbacklight -set $1
+
+fi
+
+xbacklight -get

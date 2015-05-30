@@ -1,0 +1,51 @@
+#!/usr/bin/env ruby
+# encoding: UTF-8
+#
+# Get and display weather data
+#
+
+require 'open-uri'
+require 'json'
+require 'pp'
+
+class Weather
+
+  @api = 'http://api.openweathermap.org/data/2.5/weather?q=Nashville,TN'
+  attr_accessor :current
+
+  def initialize(data)
+    @current_conditions = JSON.parse(open(@api).read)
+  end
+
+  def to_c
+    (@degrees - 273.15).round(2)
+  end
+
+  def to_f
+    (to_c * 1.8 + 32).round(2)
+  end
+
+  def to_s
+    @degrees
+  end
+
+  def stringify(val)
+    "#{val}º"
+  end
+
+  def display
+    to_s
+  end
+
+end
+
+#####################################################################
+
+command = ARGV[0]
+
+
+
+
+response.each do |k,v| puts "#{k} --> #{v}" end; 78.times { print "-"}; puts
+
+puts Weather.new("current")

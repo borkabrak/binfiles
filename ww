@@ -1,0 +1,38 @@
+#!/usr/bin/env ruby
+#
+#   Wireless shortcuts
+
+command = ARGV[0] || "status"
+
+if command == "help" or command == "usage" or command == '-h'
+  puts "Usage: $0 [help|status|scan|connect <ssid>|disconnect]"
+  exit
+end
+
+puts
+sudo = "echo 'sudo password required to access wireless functionality:' && sudo"
+iwconfig = "#{sudo} iwconfig"
+iw = "#{sudo} iw"
+
+case command
+
+when "status"
+  puts "Current status:"
+  system "#{iwconfig} wlan0"
+
+when "scan"
+  puts "Networks in range:"
+  system "#{iw} dev wlan0 scan | grep -Pi 'ssid: \\S'"
+
+when "connect"
+  ssid = ARGV[1]
+  puts "connecting to #{ssid}.."
+  system "#{iw} dev wlan0 connect #{ssid}"
+
+when "disconnect"
+  system "#{iw} dev wlan0 disconnect"
+
+else
+  puts "I don't understand what to do. '#{command}'?"
+
+end

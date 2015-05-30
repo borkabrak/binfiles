@@ -1,0 +1,15 @@
+#!/usr/bin/env zsh
+#
+#   Check the internet connection
+
+ping 8.8.8.8
+exit
+# At first, just ping for a bit
+#ping -c 9 8.8.8.8
+
+# After several pings, switch to a different look
+while [ 1 ]; do
+    clear
+    ping -c 1 8.8.8.8
+    sleep 3
+done

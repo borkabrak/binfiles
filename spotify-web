@@ -1,0 +1,5 @@
+#!/usr/bin/env zsh
+#
+# Start up Spotify's web player
+
+x-www-browser --app="http://play.spotify.com"
