@@ -1,4 +1,4 @@
-/* 
+/*
     Personal javascript library.
     ==============================================================================
 
@@ -55,7 +55,7 @@ String.prototype.wrap = function(max_length, newline) {
 
 String.prototype.reverse = function(){
     //Another way to reverse a string is to use Array's reverse:
-    //  "this.split('').reverse().join('')"; 
+    //  "this.split('').reverse().join('')";
     //but that's boring, and recursion is fun!
 	if (this.length < 2) { return this.toString() };
 	return this.slice(-1) + this.slice(0,-1).reverse();
@@ -87,8 +87,8 @@ String.prototype.pad = function(len, character, left){
 
     len = len || 0;
     character = character || ' ';
-    return (this.length >= len) ? 
-        this.toString() : 
+    return (this.length >= len) ?
+        this.toString() :
         (left? character + this : this + character).pad(len, character, left);
 }
 
@@ -114,7 +114,7 @@ Object.dc_create = function(o) {
     //       newObject = Object.create(oldObject);
 
     //   Gleaned from Douglas Crockford's recommendation at:
-    //       
+    //
     //       http://javascript.crockford.com/prototypal.html
 
 
@@ -155,7 +155,7 @@ var jdc = {
     contains: function(object, target_property){
         // Return whether this object contains the given property, at any point in
         // its hierarchy.
-     
+
 
         var my = this;
         var retval = false;
@@ -167,14 +167,14 @@ var jdc = {
         return retval;
     },
 
-    /* 
+    /*
         A subsection of color-oriented utility functions
     */
     color: {
 
         lighter: function(rgbstring, amount){
             /* Change <color> by <amount>
-               
+
                * <color> is an RGB color string (short or long)
                * <amount> is a hex value between '0' and 'ff'
 
@@ -191,9 +191,9 @@ var jdc = {
             };
 
             // Try to fail gracefully for some bad strings
-            if (rgbstring.length !== 6) { 
-                console 
-                    && console.log 
+            if (rgbstring.length !== 6) {
+                console
+                    && console.log
                     && console.log("Bad color string '%s'",rgbstring);
                 return '#000000'
             };
@@ -224,7 +224,7 @@ var jdc = {
 Math.seq = function(x, y, step){
     // Return an array of integers in a particular sequence
     //
-    //      * Two parameters represent start and endpoints (non-inclusive) 
+    //      * Two parameters represent start and endpoints (non-inclusive)
     //              (4,10)      => [4,5,6,7,8,9]
     //
     //      * One parameter, x, returns 0..x
@@ -240,8 +240,8 @@ Math.seq = function(x, y, step){
     //      * You can give a negative step, but its absolute value is all that
     //      matters.  This prevents confusion (and endless loops), i.e., when
     //      counting down, do we make step negative?  Doesn't matter!
-    //              (10,4,-2)   => [10,8,6]  
-    //              (10,4,2)    => [10,8,6]  
+    //              (10,4,-2)   => [10,8,6]
+    //              (10,4,2)    => [10,8,6]
     //              (4,10,-2)   => [4,6,8]  This happens too, but do you care?
     //
     //      -jdc 11/2/2012
@@ -298,12 +298,12 @@ Math.primes = function(x){
 };
 
 Math.randomNumber = function(x, y){
-    /* 
+    /*
         Return a random integer in the range given [x-y], inclusive.
 
         This algorithm was found in a Stack Overflow question.  The accepted
         answer contains an interesting and thorough explanation of how it
-        works.  Check it out at: 
+        works.  Check it out at:
         http://stackoverflow.com/questions/1527803/generating-random-numbers-in-javascript-in-a-specific-range
     */
     var min = y ? x : 0;
@@ -320,9 +320,9 @@ Number.prototype.times = function(f){
         NOTE: Because the method reference notation interferes with Number
         decimal notation, parentheses must be used when calling this on a
         literal Number.
-        
+
         For example:
-            
+
             10.times(function(n){ console.log("n:%s",n) };
 
         THAT DOES NOT WORK.  (The period is ambiguous to the parser -- maybe
@@ -331,8 +331,8 @@ Number.prototype.times = function(f){
             (10).times(function(n){ console.log("n:%s",n) }; // <== THIS WORKS!
 
         Or, alternatively, just use a variable:
-            
-            x = 10; 
+
+            x = 10;
             x.times(function(n){ console.log("n:%s",n) };
 
     */
@@ -343,17 +343,17 @@ Number.prototype.times = function(f){
 }
 
 Array.prototype.reorder = function(order){
-    /* 
+    /*
      Reorder the elements in the array, returning the new order as an array
-     of indices.  
-     
-     order: Array of indices indicating the order in which to place the array.  Default is random.    
+     of indices.
 
-     Examples:  
-    
+     order: Array of indices indicating the order in which to place the array.  Default is random.
+
+     Examples:
+
           * ["zero", "one","two"].reorder() will reorder the array as (perhaps)
               ["two","zero","one"] and in that case will return [2,0,1].
-    
+
           * ["zero", "one", "two"].reorder([2,1,0]) *will* change the array to ["two", "one", "zero"].
     */
 
@@ -367,20 +367,20 @@ Array.prototype.reorder = function(order){
     };
 
     // Make an array with our elements in a new order
-    var newArr = this.map( 
+    var newArr = this.map(
 
-        function(x,y){ 
-            return this[order[y]]; }, 
+        function(x,y){
+            return this[order[y]]; },
 
-        this 
+        this
 
     );
 
     // Replace our elements with the new order (Viva la revolucion!)
-    newArr.forEach( 
+    newArr.forEach(
 
-        function(x,y){ 
-            this[y] = x; }, 
+        function(x,y){
+            this[y] = x; },
 
         this
 
