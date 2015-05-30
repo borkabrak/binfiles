@@ -1,14 +1,11 @@
 #!/usr/bin/env ruby
-#
-# If we list all the natural numbers below 10 that are multiples of 3 or 5, we
-# get 3, 5, 6 and 9. The sum of these multiples is 23.  Find the sum of all the
-# multiples of 3 or 5 below 1000.
+# Find the sum of all multiples of 3 or 5 below 1000
 
-# Here's the most straightforward, least clever solution I can imagine:
-s = 0
-(1...1000).each do |n| 
-  if ((n % 3 == 0) or (n % 5 == 0))
-    s += n
-  end
-end
-puts s
+sum = 0
+
+(1..999).each { |n|
+    if (( n % 3 == 0 ) or ( n % 5 == 0)) then 
+        sum = sum + n
+    end
+}
+puts sum
