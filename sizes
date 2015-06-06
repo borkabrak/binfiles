@@ -28,8 +28,9 @@ perl -ne '
 
   # Print a header line
   BEGIN { 
-    printf "     KB     MB     GB  Filename\n";
-    print "-" x 50; print "\n";
+    printf "TOTAL(GB)         KB       MB     GB              Filename\n";
+    print "-" x 58; print "\n";
+    my $total = 0;
   }
 
   # Grab the size explicitly and allow the rest of the line to be the filename, spaces and all
@@ -37,5 +38,6 @@ perl -ne '
 
   # Calculate units and format output
   ($g, $m) = ($b / 1024 / 1024, $b / 1024);
-  printf("%7.0f  %5.0f  %5.1f  %s\n", $b, $m, $g, $f)
+  $total += $g;
+  printf("[%7.2f] %10.0f  %7.0f  %5.1f  %20s\n", $total, $b, $m, $g, $f)
 '
