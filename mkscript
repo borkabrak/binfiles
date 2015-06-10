@@ -6,7 +6,7 @@
 script_directory="/home/jon/bin/"
 
 function usage() {
-echo <<-END
+cat <<-END
     $0: Start writing a new script
 
     Usage: $0 <language> <name>
