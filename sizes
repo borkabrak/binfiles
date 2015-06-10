@@ -39,5 +39,5 @@ perl -ne '
   # Calculate units and format output
   ($g, $m) = ($b / 1024 / 1024, $b / 1024);
   $total += $g;
-  printf("[%7.2f] %10.0f  %7.0f  %5.1f  %20s\n", $total, $b, $m, $g, $f)
+  printf("[%7.2f] %10.0f  %7.0f  %5.1f  %-s\n", $total, $b, $m, $g, $f)
 '
