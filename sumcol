@@ -1,0 +1,14 @@
+#!/usr/bin/env zsh
+#
+#   Print the sum of the <arg>th column in STDIN
+
+awk -v colnumber=$1 '
+
+{
+    total+=$colnumber
+}
+
+END { 
+   print total
+}
+'
