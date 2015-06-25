@@ -16,11 +16,15 @@ lines_to_display=5
 #
 # Jon Carter borkabrak@gmail.com
 #
-# TODO: 
+# TODO:
 #   Options to:
 #   * Take a 'topic' and categorize by that.
 
-jotdir="$HOME/jot";
+jotdir="$HOME/.jot";
+if [[ ! -d $jotdir ]]; then
+    echo "$jotdir does not exist"
+    exit;
+fi
 
 # If no params, show last few entries
 if [[ $ARGC == 0 ]] then
