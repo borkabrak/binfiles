@@ -20,7 +20,7 @@ lines_to_display=5
 #   Options to:
 #   * Take a 'topic' and categorize by that.
 
-jotdir="$HOME/.jot";
+jotdir="$HOME/jot";
 if [[ ! -d $jotdir ]]; then
     echo "$jotdir does not exist"
     exit;
