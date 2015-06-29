@@ -28,6 +28,13 @@ fi
 
 # If no params, show last few entries
 if [[ $ARGC == 0 ]] then
+
+    # Print something reasonable when there are not yet any jots
+    if [[ $(ls $jotdir) == "" ]]; then
+        echo "No jots";
+        exit;
+    fi
+
     pushd -q $jotdir
     grep -H . *(n) | tail -$lines_to_display
     popd -q
