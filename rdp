@@ -1,0 +1,24 @@
+#!/usr/bin/env zsh
+#
+#   AHA-specific
+#   Quickly connect to a remote system
+
+remote_system=$1
+shift
+
+if [ $remote_system = "dev" ]; then
+    user="s-jcarter"
+    ip="192.168.1.100"
+
+elif [ $remote_system = "prod" ]; then
+    user="jcarter"
+    ip="192.168.2.100"
+
+else
+    # If remote system unknown, interpret as an IP address with a
+    # to-be-specified user name
+    ip=$remote_system
+
+fi
+
+rdesktop -P -g '90%' -d AHA -u "$user" $ip $@

@@ -1,0 +1,6 @@
+; vim: ft=lisp
+(defun double (x)
+  (* x 2))
+
+(defun square (x)
+  (* x x))
