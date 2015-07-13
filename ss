@@ -13,11 +13,14 @@ require 'open3'
 def show_sessions(sessions)
 # Display info on a given array of session data
   puts <<-END
-  Sessions:
-#{sessions.map {|s| "[#{name s}]#{s}"}.join("\n")}
+  Multiple tmux sessions are available:
+
+  * #{sessions.map {|s| "[#{name s}]#{s}"}.join("\n  * ")}
 
   Attach to one with
-    tmux attach -t [name]
+
+  `tmux attach -t [label]`
+
 END
 end
 
@@ -43,6 +46,7 @@ exec "#{cmd} attach -t #{ARGV[0]}" if ARGV.length > 0
 sessions = get_sessions
 if sessions.length > 1
   show_sessions sessions
+  exit
 elsif sessions.length == 1
   puts "Attaching to session '#{name sessions[0]}'.."
   cmd += " attach"
