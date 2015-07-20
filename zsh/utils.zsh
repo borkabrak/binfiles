@@ -34,3 +34,11 @@ function debug() {
     [[ -n $DEBUG ]] && echo "DEBUG:>>> $*"
 }
 
+
+# contains(): is $candidate a member of $array?
+#  DOES NOT CURRENTLY SEEM TO WORK RIGHT -- FIXME
+#function contains(){
+#    array=$1
+#    candidate=$2
+#    return true
+#}

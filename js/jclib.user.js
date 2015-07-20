@@ -10,7 +10,7 @@
 //==============================================================================
 String.prototype.reverse = function(){
     //Another way to reverse a string is to use Array's reverse:
-    //  "this.split('').reverse().join('')"; 
+    //  `this.split('').reverse().join('')`; 
     //but that's boring, and recursion is fun!
 	if (this.length < 2) { return this.toString() };
 	return this.slice(-1) + this.slice(0,-1).reverse();
@@ -60,7 +60,7 @@ Object.dc_create = function(o) {
 
             newObject = Object.create(oldObject);
 
-        Gleaned from Douglas Crockford's recommendation at:
+        Gleaned from Douglas Crockford's (hence the name) recommendation at:
             
             http://javascript.crockford.com/prototypal.html
 

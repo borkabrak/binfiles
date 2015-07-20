@@ -1,0 +1,73 @@
+#!/usr/bin/env zsh
+# Keep variables local to this script by wrapping the whole thing in an anonymous function
+#
+#   apti/sapti
+#
+#   Shorthand interface to aptitude with options I will usually want.
+#
+#   'apti' - short for 'aptitude'
+#   'sapti' - short for 'sudo aptitude'
+#
+# DESCRIPTION:
+#
+#   First, run any normal aptitude operation as given.
+#
+#   If first param is not an aptitude <action>:
+#     When run as 'apti' default to 'search'.
+#     When run as 'sapti' default to 'install' (with 'sudo' and a prompt to confirm.)
+#
+# EXAMPLE TRANSLATIONS (options not shown):
+#   
+#       apti string             => aptitude search string
+#
+#       sapti package           => sudo aptitude install package
+#
+#       apti show package       => aptitude show package
+#
+#       sapti search package    => sudo aptitude search package
+#
+#####################################################################################
+# TODO: 
+#   * This thing could stand to be refactored.
+#   * When this file is run directly, handle that intelligently
+#   * When run with no parameters, it should probably handle that better, as well.
+#
+#   ..I'm beginning to think this thing might be better rewritten from the
+#   ground up on Ruby or something.
+#####################################################################################
+
+# How were we called (apti or sapti)?
+invoking_command=$(basename $0) 
+
+# We have to give these options as an array, or it tries to interpret the
+# entire group as a single option and fails.
+standard_options=(--show-deps --with-recommends --prompt)
+
+aptitude_actions=("install" "remove" "purge" "hold" "unhold" "markauto" "unmarkauto" "forbid-version" "update" "safe-upgrade" "full-upgrade" "build-dep" "forget-new" "search" "show" "versions" "clean" "autoclean" "changelog" "download" "reinstall" "why" "why-not");
+
+# Are we given an action?
+if [[ -n $1 && (${aptitude_actions[(r)$1]} == $1) ]]; then;
+    action=$1
+    shift
+else;
+    # $1 is empty or not a valid aptitude action.  Decide action based on invocation.
+    if [[ $invoking_command = "apti" ]]; then
+        action="search"
+    fi
+    if [[ $invoking_command = "sapti" ]]; then
+        action="install"
+    fi
+fi;
+
+# Do we run with sudo?
+# (We also have to run the command from here, rather than building a string
+# containing the entire intended command.  Apparently, it looks for the ENTIRE
+# STRING as the command to run and fails..)
+if [[ $invoking_command = "apti" ]]; then
+    #run_command="aptitude"
+    aptitude $action $standard_options $*
+fi
+if [[ $invoking_command = "sapti" ]]; then
+    #run_command="sudo aptitude"
+    sudo aptitude $standard_options $action $*
+fi

@@ -5,13 +5,25 @@
 command = ARGV[0] || "status"
 
 if command == "help" or command == "usage" or command == '-h'
-  puts "Usage: $0 [help|status|scan|connect <ssid>|disconnect]"
+  puts <<-END
+
+  #{$0} - Manage the wireless interface
+
+  Usage: #{$0[/[^\/]*$/]} [help|status|scan|connect <ssid>|disconnect]
+
+    help            - Show this message
+    status          - (Default) show current status of the wireless interface
+    scan            - Show networks in range
+    connect <ssid>  - Connect to network <ssid>
+    disconnect      - Disconnect from current network
+
+  END
   exit
 end
 
 puts
 sudo = "echo 'sudo password required to access wireless functionality:' && sudo"
-iwconfig = "#{sudo} iwconfig"
+iwconfig = "iwconfig"
 iw = "#{sudo} iw"
 
 case command

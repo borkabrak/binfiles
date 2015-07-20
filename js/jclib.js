@@ -101,8 +101,8 @@ String.prototype.capitalize = function(){
 //==============================================================================
 //
 //  WHOA.  It turns out to be considered Very Bad to extend Object prototype,
-//  for what appear to be good reasons.  I should make my own object that
-//  offers this functionality, I guess..
+//  for what appear to be good reasons.  I should make my own object/namespace
+//  that offers this functionality, I guess..
 
 /*
 Object.dc_create = function(o) {

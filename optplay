@@ -1,0 +1,9 @@
+#!/usr/bin/env zsh
+#
+#   Play with zparseopts
+#
+#   Use a function from ~/.zfunctions
+
+typeset -a options=parseopts
+
+#print opts
