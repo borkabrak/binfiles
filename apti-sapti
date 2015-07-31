@@ -42,6 +42,11 @@ invoking_command=$(basename $0)
 # We have to give these options as an array, or it tries to interpret the
 # entire group as a single option and fails.
 standard_options=(--show-deps --with-recommends --prompt)
+# In fact, to run any command from a variable, it turns out, you can't just
+# build and run a multi-word string.  This is intentional, and there are other
+# ways to do it (e.g., like this).  More at:
+#
+#    http://www.cs.elte.hu/zsh-manual/FAQ03.html#l17
 
 aptitude_actions=("install" "remove" "purge" "hold" "unhold" "markauto" "unmarkauto" "forbid-version" "update" "safe-upgrade" "full-upgrade" "build-dep" "forget-new" "search" "show" "versions" "clean" "autoclean" "changelog" "download" "reinstall" "why" "why-not");
 
@@ -49,25 +54,28 @@ aptitude_actions=("install" "remove" "purge" "hold" "unhold" "markauto" "unmarka
 if [[ -n $1 && (${aptitude_actions[(r)$1]} == $1) ]]; then;
     action=$1
     shift
+
 else;
     # $1 is empty or not a valid aptitude action.  Decide action based on invocation.
     if [[ $invoking_command = "apti" ]]; then
         action="search"
     fi
+
     if [[ $invoking_command = "sapti" ]]; then
         action="install"
     fi
+
 fi;
 
 # Do we run with sudo?
-# (We also have to run the command from here, rather than building a string
-# containing the entire intended command.  Apparently, it looks for the ENTIRE
-# STRING as the command to run and fails..)
 if [[ $invoking_command = "apti" ]]; then
-    #run_command="aptitude"
-    aptitude $action $standard_options $*
+    command="aptitude"
 fi
+
 if [[ $invoking_command = "sapti" ]]; then
-    #run_command="sudo aptitude"
-    sudo aptitude $standard_options $action $*
+    # Array, not string.     
+    command=(sudo aptitude)
 fi
+
+# Assemble and run the full command
+$command $action $standard_options $*
