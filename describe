@@ -1,0 +1,45 @@
+#!/usr/bin/env zsh
+#
+#   Provide a brief summary of what something is
+#
+#   TODO: color code all the different types of output?
+
+autoload -U colors && colors
+
+# If nothing given, just show where we are
+if [[ $# -lt 1 ]]; then
+    print "$fg_bold[green]CURRENT DIRECTORY:[$(pwd)]"
+    print "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    ls --color -hF
+    exit
+    #usage && exit
+fi
+
+subject=$1
+
+# An executable command
+if [[ ! $(where $subject) =~ (not found) ]]; then
+    whatis $subject
+fi
+
+# An entry in the current directory
+if [[ -e $subject ]]; then
+    file $subject
+    ls -ladhF $subject
+fi
+
+# A regular file
+if [[ -f $subject ]]; then
+cat <<-END
+$fg_bold[grey]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+$(head $subject)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset_color
+END
+fi
+
+# A directory
+if [[ -d $subject ]]; then
+    # Careful: `sizes` can take a long time on a large directory
+    sizes $subject | head
+    print ". . ."
+fi
