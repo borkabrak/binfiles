@@ -1,0 +1,20 @@
+#!/usr/bin/env zsh
+#
+#   Filter for zebra-striping text.
+#
+#   TODO:  If given parameters, treat them as a command to run, the output of
+#   which we filter normally.
+
+autoload -U colors && colors
+other=false
+while read line; do
+    if [ $other = true ]; then
+        other=false
+        print "$bg[grey]$line$reset_color"
+    else
+        other=true
+        print "$line"
+    fi
+
+done
+
