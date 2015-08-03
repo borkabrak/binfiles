@@ -6,6 +6,10 @@
 #     * If multiple sessions exist, show them and explain how to attach to a one.
 #     * If there's just one existing session, attach to it automatically.
 #     * If there are no sessions, start a new one.
+#
+#     Subcommands:
+#
+#     * list - show available sessions and usage (TIP: 'ss l' shows tmux's own sessions)
 
 require 'open3'
 
@@ -44,6 +48,7 @@ cmd = "tmux -2"
 sessions = get_sessions
 
 # Respond to any commands we're specifically watching for in this script.
+# NOTE: 'ss l' will show tmux's own session list.
 if ( ARGV[0] and ARGV[0] == "list" ) then
     show_sessions(sessions)
 end
