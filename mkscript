@@ -1,13 +1,14 @@
 #!/usr/bin/env zsh
 #
-#   Start writing a new script
+#   Start writing a new script.  If it already exists, open it without changing
+#   its contents.
 
-# CONFIG
 script_directory="/home/jon/bin/"
 
 function usage() {
 cat <<-END
-    $0: Start writing a new script
+    $0: Start writing a new script.  If it already exists, open it without
+    changing its contents.
 
     Usage: $0 <language> <name>
 
@@ -25,8 +26,12 @@ shift
 name="$script_directory$1"
 shift
 
-touch $name
-chmod +x $name
-echo "#!/usr/bin/env $language\n# " > $name
-vim $name
+# If the script does not currently exist, create it (as a script)
+if [ ! -f $name ]; then
+    touch $name
+    chmod +x $name
+    echo "#!/usr/bin/env $language\n# " > $name
+fi
+
+$EDITOR $name
 
