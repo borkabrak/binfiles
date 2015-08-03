@@ -1,6 +1,8 @@
 #!/usr/bin/env ruby
 #
 #   Wireless shortcuts
+#
+#   FIXME - 'connect/disconnect' don't seem to work here.
 
 command = ARGV[0] || "status"
 
