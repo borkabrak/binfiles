@@ -2,18 +2,17 @@
 #
 #   Easy tmux interface
 #
-#   In order:
-#     * If we're given a session name parameter, use it.
-#     * If multiple sessions exist, list them and explain how to attach to a specific one.
+#     * If we're given a session name, attach to it.
+#     * If multiple sessions exist, show them and explain how to attach to a one.
 #     * If there's just one existing session, attach to it automatically.
-#     * Start a new session.
+#     * If there are no sessions, start a new one.
 
 require 'open3'
 
 def show_sessions(sessions)
 # Format and display info on available sessions as reported by tmux
   puts <<-END
-  Multiple tmux sessions are available:
+  Available tmux sessions:
 
   * #{sessions.map {|s| sprintf("%-15s %40s", "[#{name(s)}]", s)}.join("\n  * ")}
 
@@ -29,7 +28,7 @@ end
 
 def name(session)
 # Get the name of a session from its info line
-  return session[/\w+/]
+  return session[/[\w-]+/]
 end
 
 def get_sessions
@@ -42,28 +41,29 @@ end
 ##[ BEGIN MAIN PROGRAM EXECUTION ]###########################################################
 
 cmd = "tmux -2"
+sessions = get_sessions
 
-# If we're told what session to use, go ahead and do that
-#
-# ..also, check for a request just to list the session first
-# FIXME:  This is kind of a cheap and crappy way to do it.  We just check for a
-# param called "list" and simply skip the execution and fall through to the
-# session listing code.  If the structure of this script changes, this will
-# likely be missed and/or broken.
+# Respond to any commands we're specifically watching for in this script.
+if ( ARGV[0] and ARGV[0] == "list" ) then
+    show_sessions(sessions)
+end
 
-if ( ARGV.length > 0 and ARGV[0] != "list" ) then
+# Assume any arg is a session name to attach to.
+if ( ARGV.length > 0 ) then
     exec "#{cmd} attach -t #{ARGV[0]}"
 end
 
-# Otherwise, try to do the right thing automatically
-sessions = get_sessions
+# No session given - if we have multiple sessions, we can't proceed.  Show the
+# user what they can choose.
 if sessions.length > 1
   show_sessions(sessions)
 
+# If exactly one session exists, attach to it.
 elsif sessions.length == 1
   puts "Attaching to session '#{ name(sessions[0]) }'.."
   cmd += " attach"
 
+# No sessions, no commands.  Just fire up tmux on a new session.
 else
   puts "No existing sessions.  Starting a new one.."
 
