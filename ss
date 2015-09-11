@@ -9,11 +9,16 @@
 #
 #     Subcommands:
 #
-#     * list - show available sessions and usage (TIP: 'ss l' shows tmux's own sessions)
+#     * list - show available sessions and usage
+#
+#     TODO:
+#
+#     * new - start a new session, even if others exist
 
 require 'open3'
+require 'erb'
 
-def show_sessions(sessions)
+def old_show_sessions(sessions)
 # Format and display info on available sessions as reported by tmux
   puts <<-END
   Available tmux sessions:
@@ -28,6 +33,29 @@ def show_sessions(sessions)
 
   END
   exit
+end
+
+def show_sessions(sessions)
+# Format and display info on available sessions as reported by tmux
+puts ERB.new(
+"""
+  <% if sessions.length > 0 then %>
+  Available tmux sessions:
+
+    #{ sessions.map {|s| sprintf("%-15s %40s", "[#{name(s)}]", s)}.join("\n  * ") }
+
+  Attach to a session by label:
+
+    $ <%= File.basename($PROGRAM_NAME) %> [label]
+  <% else %>
+  No existing sessions are available
+  <% end %>
+
+  Start a new session:
+
+    $ tmux
+""").result
+
 end
 
 def name(session)
@@ -48,20 +76,23 @@ cmd = "tmux -2"
 sessions = get_sessions
 
 # Respond to any commands we're specifically watching for in this script.
-# NOTE: 'ss l' will show tmux's own session list.
 if ( ARGV[0] and ARGV[0] == "list" ) then
     show_sessions(sessions)
+    exit
+
 end
 
 # Assume any arg is a session name to attach to.
 if ( ARGV.length > 0 ) then
     exec "#{cmd} attach -t #{ARGV[0]}"
+
 end
 
 # No session given - if we have multiple sessions, we can't proceed.  Show the
 # user what they can choose.
 if sessions.length > 1
   show_sessions(sessions)
+  exit
 
 # If exactly one session exists, attach to it.
 elsif sessions.length == 1

@@ -3,14 +3,19 @@
 #   Provide a brief summary of what something is
 #
 #   TODO: color code all the different types of output?
+#           - That doesn't work for variable background colors (such as
+#             switching to a light background in bright-light situations)
+#           - And the color codes can look strange if filtered to something
+#             that doesn't understand it.
 
 autoload -U colors && colors
 
 # If nothing given, just show where we are
 if [[ $# -lt 1 ]]; then
-    print "$fg_bold[green]CURRENT DIRECTORY:[$(pwd)]"
+    #print "$fg_bold[green]CURRENT DIRECTORY:[$(pwd)]"
+    print "$fg_bold[green]CURRENT DIRECTORY:[$(pwd)]$reset_color"
     print "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    ls --color -hF
+    ls --color -lhF | head
     exit
     #usage && exit
 fi
@@ -18,7 +23,9 @@ fi
 subject=$1
 
 # An executable command
-if [[ ! $(where $subject) =~ (not found) ]]; then
+# (zsh provides an array of all directly executable commands)
+if (( $+commands[$subject] )); then
+    # FIXME: User-made scripts might put us here, but not respond to whatis
     whatis $subject
 fi
 
@@ -30,10 +37,11 @@ fi
 
 # A regular file
 if [[ -f $subject ]]; then
+#$fg_bold[grey]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 cat <<-END
-$fg_bold[grey]━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 $(head $subject)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━$reset_color
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 END
 fi
 

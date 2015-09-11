@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+if [[ $# < 1 ]]; then
+    echo "What do I recover?"
+    exit;
+fi
+
+filename=$1
+
+git checkout $(git rev-list -n 1 HEAD -- "$filename")^ "$filename"
+git rm -r --cached "$filename"

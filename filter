@@ -1,0 +1,6 @@
+#!/usr/bin/env zsh
+
+cat <&1;
+
+exit;
+awk < scratch 'BEGIN{longest=$0} { longest = (length() > length(longest) ? $0 : longest) } END { print longest }'

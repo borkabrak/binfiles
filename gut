@@ -1,0 +1,94 @@
+#!/usr/bin/env bash
+#
+#   Untrack files in git without deleting them
+#
+#   DEPENDENCIES:
+#       (These should be present on any system with git/Git Bash installed.)
+#       - bash
+#       - basename
+#       - cat
+#       - echo
+
+### FUNCTIONS ###############################
+function usage(){
+    cat <<-USAGE
+    USAGE:
+        $(basename $0) <path>
+
+        <path> - what to untrack, relative to the repository root.  Should be a
+                 directory, instead of a file.
+USAGE
+}
+
+function createPostMergeHook() {
+# BEGIN SCRIPT DATA BLOCK
+> .git/hooks/post-merge cat <<-DONE
+#!/usr/bin/env bash
+
+echo 'post-merge hook fired'
+
+# Check for user-specified files to preserve, even if they're untracked and
+# ignored.  For each one, recover the latest possible version (from the commit
+# immediately prior to the one that removed/untracked it.)
+
+# Start by moving to the root of the git repository.
+cd $(git rev-parse --show-toplevel)
+
+# For each file that we want to preserve..
+for filename in $(git config user.preserve); do
+
+    # If it's currently deleted..
+    if [[ ! -e "$filename" ]]; then
+
+        commit_that_removed_file=$(git rev-list -n 1 HEAD -- "$filename")
+        # Has the file *ever* existed in the repo?
+        if [[ -n $commit_that_removed_file ]]; then
+            echo "recovering [$filename].."
+            git checkout $commit_that_removed_file^ "$filename"
+
+        fi
+    fi
+done
+DONE
+# END SCRIPT DATA BLOCK
+}
+
+### MAIN SCRIPT EXECUTION ##########################
+
+# Validate params
+if [[ -z $1 ]]; then
+    echo "Untrack what?"
+    usage
+    exit;
+fi
+
+path=$1
+
+# Change to root directory of the repository
+gitroot=$(git rev-parse --show-toplevel)
+if [[ -n $gitroot ]]; then
+    cd $gitroot
+else
+    echo "$(pwd) is not part of a git repository.  Run this from within the repository."
+    exit;
+fi
+
+# Create post-merge hook if necessary
+if [[ ! -e .git/hooks/post-merge ]]; then
+    echo "Creating post-merge hook.."
+    createPostMergeHook
+fi
+
+# Ignore $path (Add it to .gitignore)
+>> .gitignore cat <<-IGNORE
+
+# Automatically added by $0
+$path/*
+
+IGNORE
+
+# Remove the files from git tracking
+git rm --cached $path
+
+# Commit the changes
+git commit .gitignore $path -m"Untrack $path"
