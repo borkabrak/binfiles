@@ -9,8 +9,6 @@
 #
 #   NOTE:  This is NOT any kind of secure crypto.  This is for fun.
 
-plain = (ARGV.length > 0 ? ARGV[0] : gets)
-
 class String
 
     def iphmotj
@@ -23,19 +21,21 @@ class String
             '0123456789'
         ]
 
-        encoded = ""
-
-        self.split(//).each do |char|
-            encodings.each do |list|
+        encoded = self.split(//).collect do |char|
+            encodings.collect do |list|
                 index = list.index(char)
-                encoded += list[( index + 1 ) % list.length] if index
+                list[( index + 1 ) % list.length] if index
             end
         end
 
-        encoded
+        encoded.join("")
 
     end
 
 end
 
+# Get the text to be encoded, either passed in as an arg or read from STDIN
+plain = (ARGV.length > 0 ? ARGV[0] : gets)
+
+# Print the encoding
 puts plain.iphmotj
