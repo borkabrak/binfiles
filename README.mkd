@@ -2,3 +2,7 @@ BINFILES
 ========
 
 My own set of exectuable scripts that I want to be portable.
+
+Only the immediate contents of this directory are tracked, allowing
+subdirectories to serve as mercurial development environments for various
+languages, containing scripts in various states of stability and usefulness.
