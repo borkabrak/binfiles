@@ -6,16 +6,36 @@
 #   The idea is that the transform leaves the text sort of pronounceable.
 #
 #   Handles text as arguments or from STDIN.  Non-letters are ignored.
+#
+#   NOTE:  This is NOT any kind of secure crypto.  This is for fun.
 
-plaintext = ""
-(ARGV.length > 0 ? ARGV[0] : gets).downcase.split(//).each do |c|
+plain = (ARGV.length > 0 ? ARGV[0] : gets)
 
-    ['bcdfghjklmnpqrstvwxz', 'aeiouy'].each do |set|
-        c = $1 if set[/#{c}(.)/]
+class String
+
+    def iphmotj
+
+        encodings = [
+            'bcdfghjklmnpqrstvwxz',
+            'aeiouy',
+            'BCDFGHJKLMNPQRSTVWXZ',
+            'AEIOUY',
+            '0123456789'
+        ]
+
+        encoded = ""
+
+        self.split(//).each do |char|
+            encodings.each do |list|
+                index = list.index(char)
+                encoded += list[( index + 1 ) % list.length] if index
+            end
+        end
+
+        encoded
+
     end
-
-    plaintext += c
 
 end
 
-puts plaintext
+puts plain.iphmotj
