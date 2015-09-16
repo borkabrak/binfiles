@@ -1,0 +1,10 @@
+#!/usr/bin/zsh
+#
+#   Evalute a string as an arithmetic expression and print the result
+
+if [[ $# < 1 ]]; then
+    echo "Please provide an arithmetic expression to evaluate."
+    exit
+fi
+
+echo $@ | bc
