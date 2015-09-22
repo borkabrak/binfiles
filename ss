@@ -17,23 +17,7 @@
 
 require 'open3'
 require 'erb'
-
-def old_show_sessions(sessions)
-# Format and display info on available sessions as reported by tmux
-  puts <<-END
-  Available tmux sessions:
-
-  * #{sessions.map {|s| sprintf("%-15s %40s", "[#{name(s)}]", s)}.join("\n  * ")}
-
-  Attach to one:
-    $ #{File.basename($PROGRAM_NAME)} [label]
-
-  Start a new session:
-    $ tmux
-
-  END
-  exit
-end
+require_relative "/home/jcarter/bin/binfiles/ruby/commands"
 
 def show_sessions(sessions)
 # Format and display info on available sessions as reported by tmux
@@ -72,37 +56,69 @@ end
 
 ##[ BEGIN MAIN PROGRAM EXECUTION ]###########################################################
 
-cmd = "tmux -2"
 sessions = get_sessions
 
-# Respond to any commands we're specifically watching for in this script.
-if ( ARGV[0] and ARGV[0] == "list" ) then
-    show_sessions(sessions)
-    exit
+# An array of arrays for easy(er) command configuration
+commands = Commands.new [
+
+    ["list", "display existing sessions", lambda { |args|
+        session_list = args[0]
+        show_sessions(session_list) 
+    }],
+
+    ["new", "start a new session", lambda { |args|
+        puts "No existing sessions.  Starting a new one.."
+        exec @@program_invocation
+    }],
+
+    ["attach", "Attach to a particular session", lambda {  |args|
+        session_index = args[1]
+        puts "Attaching to session '#{ name(sessions[session_index]) }'.."
+        @@program_invocation += " attach"
+    }],
+
+    ["help", "Display possible commands", lambda { |args|
+        puts ERB.new("""
+
+            Available commands:
+                <% for commands.each do |command| %>
+                    <% command %>: <% command.description %>
+                <% end %>
+
+        """).result
+        
+    }]
+]
+
+if ( ARGV[0] ) then
+# We have command-line arguments
+    arg = ARGV.pop
+
+    if ( commands[arg] ) then
+    # We have predefined behavior for it.  Call it and give it the session list and the remaining args
+        commands[arg].call [sessions, ARGV]
+
+    else
+    # We don't recognize the command - assume it's a session name to attach to.
+        exec "#{tmux_cmd} attach -t #{arg}"
+
+    end
+
+else 
+# No commands/arguments given
+
+    if sessions.length < 1
+    # We have no sessions, and no commands.  Just fire up tmux on a new session.
+        commands["new"].call
+
+    elsif sessions.length  == 1
+    # We have exactly one session.  Attach to it.
+        commands["attach"].call([sessions,0])
+
+    else
+    # Multiple sessions.  Show them to the user with instructions about how to attach to one
+        commands["list"].call [sessions, ARGV]
+
+    end
 
 end
-
-# Assume any arg is a session name to attach to.
-if ( ARGV.length > 0 ) then
-    exec "#{cmd} attach -t #{ARGV[0]}"
-
-end
-
-# No session given - if we have multiple sessions, we can't proceed.  Show the
-# user what they can choose.
-if sessions.length > 1
-  show_sessions(sessions)
-  exit
-
-# If exactly one session exists, attach to it.
-elsif sessions.length == 1
-  puts "Attaching to session '#{ name(sessions[0]) }'.."
-  cmd += " attach"
-
-# No sessions, no commands.  Just fire up tmux on a new session.
-else
-  puts "No existing sessions.  Starting a new one.."
-
-end
-
-exec cmd
