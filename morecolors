@@ -1,10 +1,17 @@
 #!/usr/bin/zsh
 # Reminder of how to color text
 
-echo <<END
-Set color: \\e[${i}m
+cat <<-END
+HOW TO SET COLORED TEXT
+-----------------------
+Set basic color: \\e[\${value}m
 Reset color back to normal: \\e[0m
-More colors: \\e[38;5;${i}m
+Set higher spectrum colors: \\e[38;5;\${value}m
 More info: http://en.wikipedia.org/wiki/ANSI_escape_code
 END
-for i in $(seq 0 255); do echo "\e[38;5;${i}mThis is ANSI color code $i"; done
+
+sleep 1
+
+for i in $(seq 0 255); do 
+    echo "\e[38;5;${i}mThis is ANSI color code $i :'\\\\e[38;5;${i}m'"; 
+done
