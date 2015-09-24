@@ -3,6 +3,22 @@
 #   Prepare a branch so that a Pull Request into trunk, our QA branch, can be
 #   made without further git-fu on the command line
 
+
+# FIXME:
+#
+#   !!!!!
+#
+#   We may be able to get away without rebasing!
+#
+#   What if we just create a new branch off trunk, cherry-pick all these commits on it, and push it?
+#
+#   TEST THIS
+#
+#       * Does the cherry-pick MOVE or COPY the commits?  I.E., can we finally
+#       just push our current branch, after the copy on trunk passes QA?  That
+#       would mean that the whole QA process requires no actual change to the
+#       branch, which would be very nice, indeed.
+
 ## CONFIG ##
 # The leading/trailing spaces matter here (find '=~')
 public_branches=" master release trunk "
@@ -43,7 +59,7 @@ function get-branch() {
     echo $branch
 }
 
-function forkpoint() {
+function get_base_branch() {
 # Given a particular branch, determine which of the public branches it's
 # closest to.  That will then be used as the branch it was created on.  This an
 # ASSUMPTION, but seems safe enough.
@@ -53,15 +69,15 @@ function forkpoint() {
     local branch=$1
     local shortest=9999
     local distance
-    local forkpoint
+    local base_branch
     for public_branch in $public_branches; do
-        current_distance=$(git log --oneline $public_branch..$branch)
-        if ( $current_distance < $shortest ); then
+        current_distance=$(git log --oneline $public_branch..$branch | wc -l)
+        if [ $current_distance -lt $shortest ]; then
             shortest=$current_distance
-            forkpoint=$public_branch
+            base_branch=$public_branch
         fi
     done
-    echo $forkpoint
+    echo $base_branch
 
 }
 
@@ -82,9 +98,9 @@ if ! branch-exists $branch || is-public $branch; then
     exit
 fi
 
-echo "Branch to rebase: '$branch'"
 # Determine the public branch that our work branch forks from
-forkpoint $branch
+base_branch=$(get_base_branch $branch)
+echo "Prepare for QA '$branch', currently based on '$base_branch'"
 # Rebase onto trunk
 
 # Push the branch
