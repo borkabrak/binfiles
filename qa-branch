@@ -3,6 +3,14 @@
 #   Prepare a branch so that a Pull Request into trunk, our QA branch, can be
 #   made without further git-fu on the command line
 
+## CONFIG ##
+# The leading/trailing spaces matter here (find '=~')
+public_branches=" master release trunk "
+
+## FUNCTIONS ##
+# NOTE: bash functions `return` integers which are to be used as status codes.
+# To "return" a value, output it and capture that when calling 
+
 function branch-exists() { 
     local branch=$1
     [[ -n $(git rev-parse -q --verify $branch) ]] && return 0 || return 1; 
@@ -10,7 +18,7 @@ function branch-exists() {
 
 function is-public() { 
     local branch=$1
-    [[ " master release trunk " =~ " $branch " ]] && return 0 || return 1; 
+    [[ $public_branches =~ " $branch " ]] && return 0 || return 1; 
 }
 
 function usage() {
@@ -23,23 +31,51 @@ USAGE: $(basename $0) [<branch>]
 END
 }
 
+function get-branch() {
+# return the branch name to work with:
+#
+#   * If we have an argument, use that
+#
+#   * Otherwise, assume the current branch
+
+    local branch
+    [[ $# > 0 ]] && branch=$1 || branch=$(git symbolic-ref --short HEAD)
+    echo $branch
+}
+
+function forkpoint() {
+# Given a particular branch, determine which of the public branches it's
+# closest to.  That will then be used as the branch it was created on.  This an
+# ASSUMPTION, but seems safe enough.
+
+
+# git may have some shortcuts better than this for us
+    local branch=$1
+    local shortest=9999
+    local distance
+    local forkpoint
+    for public_branch in $public_branches; do
+        current_distance=$(git log --oneline $public_branch..$branch)
+        if ( $current_distance < $shortest ); then
+            shortest=$current_distance
+            forkpoint=$public_branch
+        fi
+    done
+    echo $forkpoint
+
+}
+
 ## BEGIN MAIN SCRIPT EXECUTION ##
 
-# First:  Are we in a git repo?
+# Are we in a git repo?
 if ! git rev-parse --is-inside-work-tree 2>&1 >/dev/null; then
     echo "This must be run from inside a git repository."
     usage
     exit
 fi
 
-# Get the branch name to work with:
-#
-#   * If we have an argument, use that
-#
-#   * Otherwise, assume the current branch
-[[ $# > 0 ]] && branch=$1 || branch=$(git symbolic-ref --short HEAD)
-
-# Is it a good idea to use this branch?
+# Do we have a valid branch to work with?
+branch=$(get-branch $@)
 if ! branch-exists $branch || is-public $branch; then
     echo "'$branch' is either public or non-existent."
     usage
@@ -47,8 +83,8 @@ if ! branch-exists $branch || is-public $branch; then
 fi
 
 echo "Branch to rebase: '$branch'"
-# Determine the branch that our work branch forks from
-
+# Determine the public branch that our work branch forks from
+forkpoint $branch
 # Rebase onto trunk
 
 # Push the branch
