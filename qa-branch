@@ -5,20 +5,20 @@
 #
 # TODO:
 #
-#   * Consider whether get-base-branch could be rewritten more simply using
-#   'git merge-base', possibly with the --fork-point option.
+#   * Add appropriate error-checking
 #
-#   * We may be able to get away without rebasing (much):
+#   * quote branch names
 #
-#       What if we just create a new branch off trunk, cherry-pick all these
-#       commits on it (or rebase just that one), and push it?
-#    
-#       TEST THIS
-#    
-#           * Does the cherry-pick MOVE or COPY the commits?  I.E., can we finally
-#           just push our current branch, after the copy on trunk passes QA?  That
-#           would mean that the whole QA process requires no actual change to the
-#           branch, which would be very nice, indeed.
+#   * You'll probably have to *replace* the 'bugfix/hotfix/feature' part with
+#   'qa', instead of prepending it.
+#
+#   * thoroughly test in the real environment
+#
+#   * refactor
+#       - Consider whether get-base-branch could be rewritten more simply using
+#       'git merge-base', possibly with the --fork-point option.
+#
+#   * test again
 
 ## CONFIG ##
 # The leading/trailing spaces matter here (find '=~')
@@ -65,7 +65,6 @@ function get_base_branch() {
 # closest to.  That will then be used as the branch it was created on.  This an
 # ASSUMPTION, but seems safe enough.
 
-
 # git may have some shortcuts better than this for us
     local branch=$1
     local shortest=9999
@@ -102,11 +101,18 @@ fi
 # What public branch did we fork from?
 base_branch=$(get_base_branch $branch)
 
-# make a qa copy
-if ! git checkout $branch; then
-    echo "Couldn't checkout branch '$branch'.  Aborting."
-    exit
-fi
-
-##################################################################
 echo "Prepare for QA '$branch', currently based on '$base_branch'"
+
+# Everything looks good.  Create the QA branch as a copy of the given work
+# branch.
+qa_branch="qa/$branch"
+echo "Creating QA branch '$qa_branch' to merge into trunk.."
+git checkout -b "$qa_branch" trunk
+
+echo "Populating $qa_branch with the commits from $branch.."
+git cherry-pick "$base_branch".."$branch"
+
+# Confirm everything went well, and push?
+# git push
+
+echo "Done.  Create the pull request to merge $qa_branch into trunk."
