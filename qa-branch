@@ -2,22 +2,23 @@
 #
 #   Prepare a branch so that a Pull Request into trunk, our QA branch, can be
 #   made without further git-fu on the command line
-
-
-# FIXME:
 #
-#   !!!!!
+# TODO:
 #
-#   We may be able to get away without rebasing!
+#   * Consider whether get-base-branch could be rewritten more simply using
+#   'git merge-base', possibly with the --fork-point option.
 #
-#   What if we just create a new branch off trunk, cherry-pick all these commits on it, and push it?
+#   * We may be able to get away without rebasing (much):
 #
-#   TEST THIS
-#
-#       * Does the cherry-pick MOVE or COPY the commits?  I.E., can we finally
-#       just push our current branch, after the copy on trunk passes QA?  That
-#       would mean that the whole QA process requires no actual change to the
-#       branch, which would be very nice, indeed.
+#       What if we just create a new branch off trunk, cherry-pick all these
+#       commits on it (or rebase just that one), and push it?
+#    
+#       TEST THIS
+#    
+#           * Does the cherry-pick MOVE or COPY the commits?  I.E., can we finally
+#           just push our current branch, after the copy on trunk passes QA?  That
+#           would mean that the whole QA process requires no actual change to the
+#           branch, which would be very nice, indeed.
 
 ## CONFIG ##
 # The leading/trailing spaces matter here (find '=~')
@@ -37,7 +38,7 @@ function is-public() {
     [[ $public_branches =~ " $branch " ]] && return 0 || return 1; 
 }
 
-function usage() {
+function show-usage() {
 cat <<END
 
 USAGE: $(basename $0) [<branch>]
@@ -85,8 +86,8 @@ function get_base_branch() {
 
 # Are we in a git repo?
 if ! git rev-parse --is-inside-work-tree 2>&1 >/dev/null; then
-    echo "This must be run from inside a git repository."
-    usage
+    show-usage
+    echo "Try running this from within a git repository."
     exit
 fi
 
@@ -94,15 +95,18 @@ fi
 branch=$(get-branch $@)
 if ! branch-exists $branch || is-public $branch; then
     echo "'$branch' is either public or non-existent."
-    usage
+    show-usage
     exit
 fi
 
-# Determine the public branch that our work branch forks from
+# What public branch did we fork from?
 base_branch=$(get_base_branch $branch)
+
+# make a qa copy
+if ! git checkout $branch; then
+    echo "Couldn't checkout branch '$branch'.  Aborting."
+    exit
+fi
+
+##################################################################
 echo "Prepare for QA '$branch', currently based on '$base_branch'"
-# Rebase onto trunk
-
-# Push the branch
-
-# Rebase back onto the original branch
