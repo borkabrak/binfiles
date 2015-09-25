@@ -101,15 +101,29 @@ fi
 # What public branch did we fork from?
 base_branch=$(get_base_branch $branch)
 
-echo "Prepare for QA '$branch', currently based on '$base_branch'"
-
 # Everything looks good.  Create the QA branch as a copy of the given work
 # branch.
 qa_branch="qa/$branch"
 echo "Creating QA branch '$qa_branch' to merge into trunk.."
 git checkout -b "$qa_branch" trunk
 
+# Display the commits we think comprise the branch
+echo -e "\n---------\n"
+git log --oneline "$base_branch".."$branch"
+echo -e "\n---------\n"
+
+# Ask the user if everything looks good
+echo -ne "\n\nINFORMATION REQUIRED:\n\tAre these EXACTLY the commits in your branch?\n> "
+read response
+
+if [[ $response =~ "^[nN]" ]]; then
+    echo "Aborting.."
+    exit
+fi
+
+# Still here? Proceed with building the new branch out of the commits of the old
 echo "Populating $qa_branch with the commits from $branch.."
+
 git cherry-pick "$base_branch".."$branch"
 
 # Confirm everything went well, and push?
