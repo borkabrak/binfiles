@@ -1,68 +1,148 @@
 #!/usr/bin/env zsh
-# Keep variables local to this script by wrapping the whole thing in an anonymous function
-#
-#   apti/sapti
-#
-#   Shorthand interface to aptitude with options I will usually want.
-#
-#   'apti' - short for 'aptitude'
-#   'sapti' - short for 'sudo aptitude'
-#
-# DESCRIPTION:
-#
-#   First, run any normal aptitude operation as given.
-#
-#   If first param is not an aptitude <action>:
-#     When run as 'apti' default to 'search'.
-#     When run as 'sapti' default to 'install' (with 'sudo' and a prompt to confirm.)
-#
-# EXAMPLE TRANSLATIONS (options not shown):
-#   
-#       apti string             => aptitude search string
-#
-#       sapti package           => sudo aptitude install package
-#
-#       apti show package       => aptitude show package
-#
-#       sapti search package    => sudo aptitude search package
-#
 #####################################################################################
-# TODO: 
-#   * This thing could stand to be refactored.
-#   * When this file is run directly, handle that intelligently
+# TODO:
+#
 #   * When run with no parameters, it should probably handle that better, as well.
 #
-#   ..I'm beginning to think this thing might be better rewritten from the
-#   ground up on Ruby or something.
+#   * Make a zsh completion file?  Shouldn't be hard to just refer zsh to
+#     aptitude for completion, maybe even embedding that process in this file,
+#     for no external dependencies.
+#
 #####################################################################################
 
-# How were we called (apti or sapti)?
-invoking_command=$(basename $0) 
 
-# We have to give these options as an array, or it tries to interpret the
-# entire group as a single option and fails.
-standard_options=(--show-deps --with-recommends --prompt)
-# In fact, to run any command from a variable, it turns out, you can't just
-# build and run a multi-word string.  This is intentional, and there are other
-# ways to do it (e.g., like this).  More at:
+# NAME
+#         apti-sapti - Run aptitude and "Do what I mean".
 #
+#
+# SYNOPSIS
+#         apti [<options>] [<subcommand>] <package>
+#
+#         sapti [<options>] [<subcommand>] <package>
+#
+#
+#         <options> - options to be passed to aptitude
+#
+#         <subcommand>  - aptitude subcommand (ex. search, install, autoclean...)
+#
+#         <package> - package name (or search string, if searching)
+#
+#
+# DESCRIPTION
+#
+#         When called as `apti`, run `aptitude` with a default subcommand of 'search'.
+#
+#         When called as `sapti`, run 'sudo aptitude' with a default subcommand of
+#         'install'.
+#
+#         In both cases, also use preset options as 'sane defaults'
+#
+#         NOTE: For proper functionality, create two symbolic links, named
+#         'apti' and 'sapti' to this script:
+#
+#             $ ln -s <this script> apti
+#             $ ln -s <this script> sapti
+#
+#
+# EXAMPLE TRANSLATIONS (options not shown):
+#
+#         apti <string>             => aptitude search <string>
+#
+#         sapti <package>           => sudo aptitude install <package>
+#
+#         apti show <package>       => aptitude show <package>
+#
+#         sapti search <package>    => sudo aptitude search <package>
+#
+#
+
+############################################################################
+# CONFIGURE STANDARD OPTIONS HERE #
+###################################
+#
+# This next assignment determines the default options that any invocation of
+# this script will use when running aptitude
+#
+#  NOTE: We set options as an array instead of a string, for use as part of a
+#  command.  Further reading:
 #    http://www.cs.elte.hu/zsh-manual/FAQ03.html#l17
+############################################################################
+standard_options=(
+    --show-deps
+    --with-recommends
+    --prompt
+)
+############################################################################
 
-aptitude_actions=("install" "remove" "purge" "hold" "unhold" "markauto" "unmarkauto" "forbid-version" "update" "safe-upgrade" "full-upgrade" "build-dep" "forget-new" "search" "show" "versions" "clean" "autoclean" "changelog" "download" "reinstall" "why" "why-not");
+function usage() {
+    cat <<-ENDHERE
 
-# Are we given an action?
-if [[ -n $1 && (${aptitude_actions[(r)$1]} == $1) ]]; then;
-    action=$1
+    USAGE
+         apti-sapti - Run aptitude and "Do what I mean".
+
+
+         apti [<options>] [<subcommand>] <package>
+
+         sapti [<options>] [<subcommand>] <package>
+
+
+         <options> - options to be passed to aptitude
+
+         <subcommand>  - aptitude subcommand (ex. search, install, autoclean...)
+
+         <package> - package name (or search string, if searching)
+
+ENDHERE
+}
+
+# How were we called (apti or sapti)?
+invoking_command=$(basename $0)
+
+aptitude_subcommands=(
+    "install"
+    "remove"
+    "purge"
+    "hold"
+    "unhold"
+    "markauto"
+    "unmarkauto"
+    "forbid-version"
+    "update"
+    "safe-upgrade"
+    "full-upgrade"
+    "build-dep"
+    "forget-new"
+    "search"
+    "show"
+    "versions"
+    "clean"
+    "autoclean"
+    "changelog"
+    "download"
+    "reinstall"
+    "why"
+    "why-not"
+);
+
+# If a subcommand was specified, use it.
+if [[ -n $1 && (${aptitude_subcommands[(r)$1]} == $1) ]]; then;
+    subcommand=$1
     shift
 
 else;
-    # $1 is empty or not a valid aptitude action.  Decide action based on invocation.
+    # No subcommand specified.  Use the default based on how we were called.
     if [[ $invoking_command = "apti" ]]; then
-        action="search"
+        subcommand="search"
     fi
 
     if [[ $invoking_command = "sapti" ]]; then
-        action="install"
+        subcommand="install"
+    fi
+
+    if [[ $invoking_command = $(basename $0:A) ]]; then
+        echo "Please call this as either \`apti\` or \`sapti\`.  This is not designed to be called directly."
+        usage
+        exit
     fi
 
 fi;
@@ -73,9 +153,13 @@ if [[ $invoking_command = "apti" ]]; then
 fi
 
 if [[ $invoking_command = "sapti" ]]; then
-    # Array, not string.     
+
+    # We're about to invoke a command which may prompt the user for their
+    # password.  Explain why.
+    echo "Invoking with sudo. Password may be required."
     command=(sudo aptitude)
 fi
 
+# Invoking as 'sapti' with no params tries to do something.  WTF?
 # Assemble and run the full command
-$command $action $standard_options $*
+$command $subcommand $standard_options $*
