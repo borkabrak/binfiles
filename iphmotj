@@ -1,17 +1,27 @@
 #!/usr/bin/env ruby
 #
-#   Pseudo-crypt text by shifting each consonant and vowel one consonant or
-#   vowel to the right (e.g., 'english' becomes 'iphmotj')
+#   Obfuscate text by shifting each consonant and vowel one consonant or
+#   vowel to the right (e.g., 'english' becomes 'iphmotj').
 #
-#   The idea is that the transform leaves the text sort of pronounceable.
+#   Example:
+#       a -> e  # next vowel
+#       b -> c
+#       c -> d
+#       d -> f  # next consonant
+#
+#   In other words, it's a rotation cipher but where consonants and vowels stay
+#   that way.  The idea is that it sort of preserves pronounceability.
 #
 #   Handles text as arguments or from STDIN.  Non-letters are ignored.
 #
 #   NOTE:  This is NOT any kind of secure crypto.  This is for fun.
+#
+#   TODO:
+#       * characters without an encoding are unchanged, (not skipped)
 
 class String
 
-    def iphmotj
+    def iphmotj(offset)
 
         encodings = [
             'bcdfghjklmnpqrstvwxz',
@@ -21,21 +31,32 @@ class String
             '0123456789'
         ]
 
-        encoded = self.split(//).collect do |char|
-            encodings.collect do |list|
+        self.split(//).map do |char|
+            encodings.map do |list|
                 index = list.index(char)
-                list[( index + 1 ) % list.length] if index
+                list[( index + offset ) % list.length] if index
             end
-        end
-
-        encoded.join("")
+        end.join("")
 
     end
 
 end
 
-# Get the text to be encoded, either passed in as an arg or read from STDIN
-plain = (ARGV.length > 0 ? ARGV[0] : gets)
+# Convert command line to a single string because it's actually easier to parse
+# options this way (eat that, perl)
+arguments = ARGV.join(' ')
 
-# Print the encoding
-puts plain.iphmotj
+# Option:
+#   -o <val>, --offset=<val>' - move each character <val> positions down
+#
+# This particular way of parsing the option seems hacky, but it does work at
+# both catching the option's value and removing the entire option specification
+# from the argument list.
+offset = arguments.sub!(/(-o|--offset)[\s=]?(\d+)/,"") ? $2.to_i : 1
+
+# The text to be encoded is either passed in as an argument or read from STDIN
+# (if the argument list has no non-whitespace content)
+plain = (arguments[/\S/] ? arguments : STDIN.gets )
+
+# Finally, do what we came here to do.
+puts plain.iphmotj offset

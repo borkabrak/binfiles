@@ -1,5 +1,6 @@
 #!/usr/bin/env zsh
 #
+file_extension="mkd"
 # Start writing.
 writedir=~/documents/write
 
@@ -7,7 +8,7 @@ if [[ ! -z $1 ]]; then
   filename=$1
 else
   # If not specified, open today's file.   
-  filename=$(date +%F).txt
+  filename=$(date -I).$file_extension
 fi
 
 if [[ ! -d $writedir ]]; then
