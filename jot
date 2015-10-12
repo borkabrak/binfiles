@@ -19,6 +19,8 @@ lines_to_display=5
 # TODO:
 #   Options to:
 #   * Take a 'topic' and categorize by that.
+#
+#   * Pass an argument to search by
 
 jotdir="$HOME/jot";
 if [[ ! -d $jotdir ]]; then
@@ -48,6 +50,15 @@ fi
 
 # Different file each day
 jotfile="$HOME/jot/$(date +%F).txt"
+
+# Respond to subcommands
+if [[ $1 == "grep" ]]; then
+    # The remaining arguments are for grep, though we can assume a recursive
+    # directory search on where the jots are stored.
+    shift
+    grep --color -r $@ $jotdir
+    exit
+fi
 
 entry="$(date +%r):$(pwd): $*" 
 
