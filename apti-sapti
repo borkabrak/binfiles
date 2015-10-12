@@ -8,8 +8,10 @@
 #     aptitude for completion, maybe even embedding that process in this file,
 #     for no external dependencies.
 #
+#   * CONSIDER, in the case apti is run w/o a subcommand, and exactly one
+#     result is returned, go ahead and do 'show'?
+#
 #####################################################################################
-
 
 # NAME
 #         apti-sapti - Run aptitude and "Do what I mean".
@@ -53,7 +55,6 @@
 #         apti show <package>       => aptitude show <package>
 #
 #         sapti search <package>    => sudo aptitude search <package>
-#
 #
 
 ############################################################################
@@ -156,7 +157,7 @@ if [[ $invoking_command = "sapti" ]]; then
 
     # We're about to invoke a command which may prompt the user for their
     # password.  Explain why.
-    echo "Invoking with sudo. Password may be required."
+    echo "This command requires sudo permission"
     command=(sudo aptitude)
 fi
 
