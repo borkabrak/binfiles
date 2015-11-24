@@ -1,0 +1,22 @@
+#!/usr/bin/env zsh
+#
+#   Show the entire content of all conflicts in a git repository.
+#
+#   Include file name and line numbers.
+#
+
+# Go to git root dir
+cd $(git rev-parse --show-toplevel)
+
+# Loop through files containing conflicts
+for f in $(git diff --name-only --diff-filter=U); do 
+
+    # Show filename
+    echo "$f:";
+
+    # Show the content of all conflict blocks
+    awk '/^<{3,} HEAD/,/^>{3,}/{ print NR ":",  $LN }' $f;
+
+    echo;
+
+done
