@@ -52,7 +52,7 @@ arguments = ARGV.join(' ')
 # This particular way of parsing the option seems hacky, but it does work at
 # both catching the option's value and removing the entire option specification
 # from the argument list.
-offset = arguments.sub!(/(-o|--offset)[\s=]?(\d+)/,"") ? $2.to_i : 1
+offset = arguments.sub!(/(-o|--offset)[\s=]?(-?\d+)/,"") ? $2.to_i : 1
 
 # The text to be encoded is either passed in as an argument or read from STDIN
 # (if the argument list has no non-whitespace content)
