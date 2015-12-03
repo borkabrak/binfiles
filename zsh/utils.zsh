@@ -42,3 +42,34 @@ function debug() {
 #    candidate=$2
 #    return true
 #}
+
+
+# Return 0 iff all the arguments are available commands.
+#
+# This is intended to be called from shell scripts, to confirm whether the
+# given commands exist, and to gracefully handle it when they do not.
+#
+# Use it like this:
+#
+#   require command1 command2 || exit
+#
+# If any of the commands are not found, a message will be printed to that
+# effect and the main script exits.
+function require() {
+
+    typeset -a missing_dependencies
+
+    # Populate the missing dependencies
+    for resource in $@; do
+        if [[ -z $(whence $resource) ]]; then
+            missing_dependencies+=$resource
+        fi
+    done
+
+    # Notify of errors
+    if [[ $#missing_dependencies > 0 ]]; then
+        print "$#missing_dependencies Required dependecies missing:\n\t$missing_dependencies"
+        return $#missing_dependencies
+    fi
+
+}
