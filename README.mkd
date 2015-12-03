@@ -16,3 +16,5 @@ TODO
 
   It could also handle object notation in most languages, maybe a few other
   things.
+
+  Check ticgit $(ti list)

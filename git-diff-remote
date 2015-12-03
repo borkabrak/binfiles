@@ -1,0 +1,16 @@
+#!/usr/bin/env zscript
+# vim: ft=zsh
+#
+#   git-diff-remote - diff the current branch with its remote counterpart
+#
+#
+#   This display a side-by-side comparison of which commits are unique to each branch.
+
+# Confirm dependencies
+require pygmentize diff git
+
+# Get the current branch name
+branch=$(git rev-parse --abbrev-ref HEAD)
+
+logcmd=(git log --oneline)
+diff -y -W156 =($logcmd origin/$branch..$branch) =($logcmd $branch..origin/$branch) | pygmentize -g
