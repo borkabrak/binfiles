@@ -6,3 +6,13 @@ My own set of exectuable scripts that I want to be portable.
 Only the immediate contents of this directory are tracked, allowing
 subdirectories to serve as mercurial development environments for various
 languages, containing scripts in various states of stability and usefulness.
+
+TODO
+====
+
+* What about some kind of Logical, or non-lexical diff.  e.g., when comparing
+  two HTML elements, it just checks whether they have the same attributes with
+  the same values, but doesn't care about what order they're given in?
+
+  It could also handle object notation in most languages, maybe a few other
+  things.
