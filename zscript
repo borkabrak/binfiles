@@ -1,0 +1,22 @@
+#!/usr/bin/env zsh
+#
+#   zscript - Run scripts with this instead of 'zsh' (TODO: Can this be
+#   automated?) to wrap zsh code with some script-appropriate options and
+#   settings.
+#
+#   To use this, use this in the shebang line instead of the zsh executable.
+#   That is, make this the first line of the script file:
+#
+#       #!/usr/bin/env zscript
+
+# Exit on the first nonzero return code
+setopt errexit
+
+# Provide the script with some useful script utilities
+source ~/bin/zsh-utils
+
+# TODO: 
+#   * Make sure vim knows that it's still a zsh script, regardless of the shebang line
+
+# Finally, execute the script
+source $1
