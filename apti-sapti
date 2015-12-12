@@ -2,14 +2,18 @@
 #####################################################################################
 # TODO:
 #
-#   * When run with no parameters, it should probably handle that better, as well.
-#
 #   * Make a zsh completion file?  Shouldn't be hard to just refer zsh to
 #     aptitude for completion, maybe even embedding that process in this file,
 #     for no external dependencies.
 #
 #   * CONSIDER, in the case apti is run w/o a subcommand, and exactly one
-#     result is returned, go ahead and do 'show'?
+#     result is returned, go ahead and do 'show'?  (No; *offer* to.  And ignore
+#     whether the search was explicit.)
+#
+#   * If apti is explicitly given a command that requires sudo, Switch to it
+#     before proceeding.  In other words, if it turns out that sudo is
+#     required, offer to try it, instead of letting aptitude report permission
+#     errors.
 #
 #####################################################################################
 
@@ -69,9 +73,13 @@
 #    http://www.cs.elte.hu/zsh-manual/FAQ03.html#l17
 ############################################################################
 standard_options=(
-    --show-deps
-    --with-recommends
-    --prompt
+
+    --prompt            # Always display a prompt
+
+    --with-recommends   # Treat recommendations as dependencies
+
+    --show-deps         # show brief explanations of automatic installations
+                        # and removals
 )
 ############################################################################
 
@@ -79,19 +87,28 @@ function usage() {
     cat <<-ENDHERE
 
     USAGE
+
          apti-sapti - Run aptitude and "Do what I mean".
 
+         Run 'aptitude' and assume the subcommand 'search':
+            $ apti [<options>] [<subcommand>] <package>
 
-         apti [<options>] [<subcommand>] <package>
+         Run 'sudo aptitude' and assume the subcommand 'install':
+            $ sapti [<options>] [<subcommand>] <package>
 
-         sapti [<options>] [<subcommand>] <package>
+    PARAMETERS
+         <options>
+            options to be passed to aptitude
 
+         <subcommand>
+            aptitude subcommand (ex. search, install, autoclean...)
+            If this parameter is not given, then a default will be chosen based
+            on how this script was invoked -- the 'search' subcommand will be
+            used if this script was run as 'apti', and 'install' will be used
+            if run as 'sapti'.
 
-         <options> - options to be passed to aptitude
-
-         <subcommand>  - aptitude subcommand (ex. search, install, autoclean...)
-
-         <package> - package name (or search string, if searching)
+         <package>
+            package name (or search string, if searching)
 
 ENDHERE
 }

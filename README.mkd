@@ -9,4 +9,7 @@ languages, containing scripts in various states of stability and usefulness.
 
 TODO
 ====
-Check ticgit $(ti list)
+To see this info, I'm giving ticgit a go.  See tickets with this (from the
+repo root directory):
+
+    $ ti list
