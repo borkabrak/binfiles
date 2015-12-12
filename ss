@@ -76,9 +76,12 @@ cmd = "tmux -2"
 sessions = get_sessions
 
 # Respond to any commands we're specifically watching for in this script.
-if ( ARGV[0] and ARGV[0] == "list" ) then
-    show_sessions(sessions)
-    exit
+if ( ARGV[0] ) then
+    case ARGV[0]
+    when "list"
+        show_sessions(sessions)
+        exit
+    end
 
 end
 
