@@ -180,4 +180,6 @@ fi
 
 # Invoking as 'sapti' with no params tries to do something.  WTF?
 # Assemble and run the full command
-$command $subcommand $standard_options $*
+fullcommand=($command $subcommand $standard_options $*)
+$fullcommand
+
