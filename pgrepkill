@@ -1,0 +1,33 @@
+#!/usr/bin/env zsh
+#
+# DESCRIPTION
+#
+#   p(grep,kill)
+#
+#   Find processes matching a pattern, show them to the user, and offer to kill
+#
+#   Use case: *something* is slamming my pc, and I need to stop it.  Is it <thing>?
+#
+#   If no parameters given, run top to have a look at everything running on the computer.
+
+if [[ $# < 1 ]]; then
+    # If no parameters, just run top
+    exec top
+fi
+
+pattern=$1
+shift
+
+pgrep -a $pattern
+
+print
+print "Options to pkill. (Default: '$pattern', ^C cancels)"
+read pkill_options
+
+command=(pkill $pkill_options $pattern)
+print $command
+$command
+
+sleep 1
+
+pgrep -a $pattern
