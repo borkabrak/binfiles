@@ -1,19 +1,24 @@
 #!/usr/bin/env zsh
 #
-file_extension="mkd"
-# Start writing.
-writedir=~/documents/write
+#   Just start writing.
+#
+#   Opens a (optionally named) file in the editor without having to worry about
+#   directories, filenames, etc.
+#
+#   TODO: If <file> exists in $PATH, or something, open it there?
 
-if [[ ! -z $1 ]]; then
+# Reasonable default filename
+filename=$(date -I).mkd
+
+# A user-specified filename takes precedence
+if [[ $# > 0 ]]; then
   filename=$1
-else
-  # If not specified, open today's file.   
-  filename=$(date -I).$file_extension
 fi
 
-if [[ ! -d $writedir ]]; then
-  echo "$writedir does not exist"
-  exit;
-fi
+# Reasonable default location
+cd ~/documents/write
 
-$EDITOR $writedir/$filename
+# Silently create any directories necessary
+mkdir -p $(dirname $filename)
+# Open file
+$EDITOR $filename
