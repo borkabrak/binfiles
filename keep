@@ -1,0 +1,7 @@
+#!/usr/bin/env zsh
+#
+#   Start google keep
+#
+#   Command line used here gleaned from the Desktop launcher shortcut created by.. Chrome, I guess?
+
+/opt/google/chrome/google-chrome --profile-directory=Default --app-id=hmjkmjkepdijhoojdojkdfohbdgmmhki
