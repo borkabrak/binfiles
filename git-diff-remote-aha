@@ -1,0 +1,18 @@
+#!/usr/bin/env zsh
+#
+#
+#   Show any commits that differ between the currently checked out local branch and its remote counterpart
+
+# Any argument specifies which remote to use.  Default is 'origin'.
+remote_name="origin"
+if [[ $# -gt 0 ]]; then
+    remote_name=$1
+fi
+
+# Show a side-by-side diff
+#     Left side: commits unique to local
+#     Right side: commits unique to remote
+
+echo "\n$(git rev-parse --abbrev-ref HEAD) <-- / --> origin/$(git rev-parse --abbrev-ref HEAD)"
+echo "\n=============\n"
+diff -y =(git log --oneline   $remote_name/$(git rev-parse --abbrev-ref HEAD).. ) =( git log --oneline ..$remote_name/$(git rev-parse --abbrev-ref HEAD) $@ ) | pygmentize -g
