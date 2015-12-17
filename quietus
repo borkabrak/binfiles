@@ -1,0 +1,30 @@
+#!/usr/bin/env zsh
+#
+# Custom suspend
+#
+# Dependencies are mostly xfce stuff:
+#
+#   xbacklight
+#   xflock4
+#   xfce4-session-logout
+
+echo "$(date -Iminutes) - $HOST is going to sleep"
+
+dim=5
+
+# Pack up your toys
+previous_dimness=$(xbacklight -get)
+
+# Turn down the lights
+echo "Dimming screen to $dim%"
+xbacklight -set $dim 
+
+# Lock the door
+echo "Locking screen"
+xflock4
+
+# And go to sleep
+xfce4-session-logout --suspend
+
+# When we wake up, turn the lights back on
+xbacklight -set $previous_dimness

@@ -2,11 +2,14 @@
 #
 #   Filter for zebra-striping text.
 #
+#   Currently, text must be piped into this command.
+#
 #   TODO:  If given parameters, treat them as a command to run, the output of
 #   which we filter normally.
 
 autoload -U colors && colors
 other=false
+
 while read line; do
     if [ $other = true ]; then
         other=false
