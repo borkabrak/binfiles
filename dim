@@ -1,15 +1,56 @@
 #!/usr/bin/env zsh
 #
-# Manage screen brightness.  'dim' is easy to type
+# Manage screen brightness
+#
+#   EXAMPLES:
+#
+#      # Print current brightness setting
+#      $ dim
+#
+#      # Set screen brightness to 50% of maximum
+#      $ dim 50
+#
+#      # Increase by 10%
+#      $ dim 10+
+#      $ dim +10
+#
+#      # Decrease by 20%
+#      $ dim -20
+#
+#  In all cases, the final brightness percentage is printed to stdout.
+#
+#  So named because 'dim' is easier to type than 'bright'.
+#
+##########################################################
 
-#if [[ "$1" =~ /^(+|-)/ ]]; then
-#
-#  echo "arg is relative"
-#
+
+# Was an argument given?
 if [[ -n $1 ]]; then
 
-  xbacklight -set $1
+    # Extract numeric value
+    argval=$(echo $1 | sed 's/[-+]//g')
+
+    # Decide subcommand based on whether argument contains a -+ sign
+    case $1 in
+
+        *-*)
+            command="xbacklight -dec $argval"
+            ;;
+
+        *+*)
+            command="xbacklight -inc $argval"
+            ;;
+
+        *)
+            command="xbacklight -set $argval"
+            ;;
+
+    esac
+
+    eval $command
 
 fi
 
-xbacklight -get
+# Output current brightness to stdout and as a notification balloon
+brightness=$(xbacklight -get | sed 's/\..*$//') # Truncate to integer
+echo $brightness && notify-send --expire-time 2000 -i "sunny" "$brightness%"
