@@ -90,15 +90,22 @@ function usage() {
 
          apti-sapti - Run aptitude and "Do what I mean".
 
-         Run 'aptitude' and assume the subcommand 'search':
+
+         'apti' runs 'aptitude' and assumes the subcommand 'search':
             $ apti [<options>] [<subcommand>] <package>
 
-         Run 'sudo aptitude' and assume the subcommand 'install':
+
+         'sapti' runs 'sudo aptitude' and assumes the subcommand 'install':
             $ sapti [<options>] [<subcommand>] <package>
+
 
     PARAMETERS
          <options>
-            options to be passed to aptitude
+            options to be passed to aptitude.
+            The default options (passed if none specified) are:
+
+                $standard_options
+
 
          <subcommand>
             aptitude subcommand (ex. search, install, autoclean...)
@@ -106,6 +113,7 @@ function usage() {
             on how this script was invoked -- the 'search' subcommand will be
             used if this script was run as 'apti', and 'install' will be used
             if run as 'sapti'.
+
 
          <package>
             package name (or search string, if searching)
@@ -142,8 +150,14 @@ aptitude_subcommands=(
     "why-not"
 );
 
+
+# If no arguments at all, show usage and exit
+if [[ $# = 0 ]]; then
+    usage;
+    exit;
+
 # If a subcommand was specified, use it.
-if [[ -n $1 && (${aptitude_subcommands[(r)$1]} == $1) ]]; then;
+elif [[ -n $1 && (${aptitude_subcommands[(r)$1]} == $1) ]]; then
     subcommand=$1
     shift
 
@@ -159,7 +173,6 @@ else;
 
     if [[ $invoking_command = $(basename $0:A) ]]; then
         echo "Please call this as either \`apti\` or \`sapti\`.  This is not designed to be called directly."
-        usage
         exit
     fi
 
@@ -178,7 +191,6 @@ if [[ $invoking_command = "sapti" ]]; then
     command=(sudo aptitude)
 fi
 
-# Invoking as 'sapti' with no params tries to do something.  WTF?
 # Assemble and run the full command
 fullcommand=($command $subcommand $standard_options $*)
 $fullcommand
