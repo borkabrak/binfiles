@@ -1,0 +1,19 @@
+#!/usr/bin/env zsh
+#
+#   Display lists of commit message that differ between the current branch and the one given by the argument
+
+
+if [[ $# > 1 ]]; then
+    branch1=$1
+    shift
+else
+    # Use current branch
+    branch1=$(git symbolic-ref --short HEAD)
+fi
+
+[[ -n $1 ]] && branch2=$1 || { echo "What branch do you want to diff against?"; exit }
+
+autoload colors && colors
+printf "\n%-75s$fg_bold[green]|$reset_color%75s\n" "< $fg_bold[blue]$branch1$reset_color" "$fg_bold[blue]$branch2$reset_color >"
+printf  "$fg_bold[green]--------------------------------------------------------------+--------------------------------------------------------------$reset_color\n"
+diff -y =(git log --oneline $branch2..$branch1) =(git log --oneline $branch1..$branch2)
