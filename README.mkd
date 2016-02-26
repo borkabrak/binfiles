@@ -9,7 +9,12 @@ languages, containing scripts in various states of stability and usefulness.
 
 TODO
 ====
-To see this info, I'm giving ticgit a go.  See tickets with this (from the
-repo root directory):
 
-    $ ti list
+* What about some kind of Logical, or non-lexical diff.  e.g., when comparing
+  two HTML elements, it just checks whether they have the same attributes with
+  the same values, but doesn't care about what order they're given in?
+
+  It could also handle object notation in most languages, maybe a few other
+  things.
+
+  Check ticgit $(ti list)
