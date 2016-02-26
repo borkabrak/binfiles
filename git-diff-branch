@@ -1,17 +1,29 @@
 #!/usr/bin/env zsh
 #
-#   Display lists of commit message that differ between the current branch and the one given by the argument
+#   Display commits that differ between two branches
+#
+#       git diff-branch [<branch1>] [<branch2>]
+#
+#   Two branches can be given, and a diff between them will be displayed
+#
+#   If one branch is given, the current branch is diffed against it
+#
+#   If no branches are given, the current branch is diffed against master
 
 
 if [[ $# > 1 ]]; then
+    #   Two branches can be given, and a diff between them will be displayed
     branch1=$1
-    shift
-else
-    # Use current branch
+    branch2=$2
+elif [[ $# > 0 ]]; then
+    #   If one branch is given, the current branch is diffed against it
     branch1=$(git symbolic-ref --short HEAD)
+    branch2=$1
+else
+    #   If no branches are given, the current branch is diffed against master
+    branch1=$(git symbolic-ref --short HEAD)
+    branch2="master"
 fi
-
-[[ -n $1 ]] && branch2=$1 || { echo "What branch do you want to diff against?"; exit }
 
 autoload colors && colors
 printf "\n%-75s$fg_bold[green]|$reset_color%75s\n" "< $fg_bold[blue]$branch1$reset_color" "$fg_bold[blue]$branch2$reset_color >"
