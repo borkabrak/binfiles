@@ -12,20 +12,35 @@
 
 
 if [[ $# > 1 ]]; then
-    #   Two branches can be given, and a diff between them will be displayed
+    #   Two (or more) args - two branches to diff against each other
     branch1=$1
     branch2=$2
+
 elif [[ $# > 0 ]]; then
-    #   If one branch is given, the current branch is diffed against it
-    branch1=$(git symbolic-ref --short HEAD)
-    branch2=$1
+    #   One argument
+    if [[ $1 =~ 'origin' ]]; then
+        # Argument is 'origin' - diff current branch against origin's version
+        branch1=$(git symbolic-ref --short HEAD)
+        branch2=origin/$(git symbolic-ref --short HEAD)
+
+    else
+        #   The current branch is diffed against the arg
+        branch1=$(git symbolic-ref --short HEAD)
+        branch2=$1
+
+    fi
+
 else
-    #   If no branches are given, the current branch is diffed against master
-    branch1=$(git symbolic-ref --short HEAD)
-    branch2="master"
+    #   If no branches are given, master is diffed against the current branch
+    branch1="master"
+    branch2=$(git symbolic-ref --short HEAD)
+
 fi
 
 autoload colors && colors
 printf "\n%-75s$fg_bold[green]|$reset_color%75s\n" "< $fg_bold[blue]$branch1$reset_color" "$fg_bold[blue]$branch2$reset_color >"
 printf  "$fg_bold[green]--------------------------------------------------------------+--------------------------------------------------------------$reset_color\n"
 diff -y =(git log --oneline $branch2..$branch1) =(git log --oneline $branch1..$branch2)
+
+## END ##
+exit;
