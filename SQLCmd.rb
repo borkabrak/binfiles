@@ -34,7 +34,11 @@ class SQLCmd
             return nil
         end
 
+        # Dev
         command_output = `sqlcmd -u -S AH-DEV-DB01 -d AHA_APP -s'#{@field_delimiter}' -W -Q "#{@command_text}"`
+
+        # Prod
+        #command_output = `sqlcmd -u -U'dev_prod' -P??? -S AH-DEV-DB01 -d AHA_APP -s'#{@field_delimiter}' -W -Q "#{@command_text}"`
 
         # This does NOT catch SQL ERRORS.  It catches failures of the 'sqlcmd'
         # utility.  Examine the result text of that command to detect errors.
