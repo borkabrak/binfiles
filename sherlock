@@ -1,0 +1,23 @@
+#!/usr/bin/env zsh
+#
+# c - for "see"
+#
+#   See what can be automatically be deduced about the given param
+#
+# If param is given, '[c]at' its contents
+#
+#       If it's a file, print its contents to the screen
+#
+#       if it's a directory, list what it contains
+#
+#       if it doesn't exist here, check $PATH
+#
+# This is a strange combination of functions, granted, but it suits my whimsy
+# at the moment.
+
+# If no params given, noop
+[ $# -lt 0 ] && return
+
+file=$1; shift;
+
+echo "I don't do anything right now.  Give me a case!"

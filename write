@@ -7,6 +7,12 @@
 #
 #   TODO: If <file> exists in $PATH, or something, open it there?
 
+# Find a sane way to decide between these options
+# Eventually let gvim be triggered by a -g option..
+editor=gvim
+#editor=vim
+#editor=$EDITOR
+
 # Reasonable default filename
 filename=$(date -I).mkd
 
@@ -20,5 +26,7 @@ cd ~/documents/write
 
 # Silently create any directories necessary
 mkdir -p $(dirname $filename)
+
 # Open file
-$EDITOR $filename
+$editor $filename
+

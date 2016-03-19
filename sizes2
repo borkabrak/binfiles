@@ -1,0 +1,53 @@
+#!/usr/bin/env perl
+#
+# List disk usage of contents, sorted by size
+#
+# Dependencies:
+#   * du
+use warnings;
+use strict;
+use 5.010;
+use Data::Dumper;
+
+# Usage
+# if [[ $1 =~ '--help|-h' ]]; then
+#   echo "USAGE: $0 [target directory]     # optional: defaults to current directory"
+#   exit
+# fi
+
+###############
+# PRINT HEADER 
+###############
+sub header {
+# Print a header line
+    return "TOTAL (GB)         KB       MB     GB  Filename            \n" .
+           "---------------------------------------------------------------------\n";
+}
+
+#################
+# GENERATE OUTPUT
+#################
+my ($total, $totalKB, $totalGB) = (0, 0);
+my $cmd = "du -s @ARGV";
+open DU, "$cmd |" or die "Couldn't open pipe:$!\n"; 
+
+# Iterate over input, sorted numerically (spaceship, not cmp), and descending (b, then a)
+for (sort { 
+        # Sort numerically by the numeric parts - in this case, the file sizes
+        ($b =~ /(\d+)/)[0] <=> ($a =~ /(\d+)/)[0] 
+    } <DU> ) {
+
+    # Split line into size (in KB, as `du` outputs) and filename (including spaces)
+    my ($kb, $file) = (/(\d+)\s+(.*)/);
+
+    # Calculate units and format output
+    my ($gb, $mb) = ($kb / 1024 / 1024, $kb / 1024);
+
+    # Accumulate total usage in KB
+    $totalKB += $kb;
+    $totalGB = $totalKB / (1024**2);
+    
+    # Output line
+    printf("[%7.2f ] %10.0f  %7.0f  %5.1f  %-s\n", $totalGB, $kb, $mb, $gb, $file)
+
+}

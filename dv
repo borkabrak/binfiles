@@ -1,0 +1,36 @@
+#!/usr/bin/env zsh
+#
+#   dv - [d]im[v]ol - run 'dim' and 'vol' together, with the given parameters
+#
+#   The defaults are hardcoded right now, but maybe we can be smarter.  Maybe
+#   if a given setting is at max, put it at min, and vice versa.
+
+function report() {
+    echo "brightness: $brightness"
+    echo "volume: $volume"
+}
+
+
+if [[ $# > 1 ]]; then
+    # Use the args for brightness and volume respectively
+    brightness=$1
+    volume=$2;
+
+elif [[ $# > 0 ]]; then 
+    # Just one arg - use it for both
+    brightness=$1
+    volume=$brightness
+
+else
+    # No arguments.  Default both.
+    brightness=100
+    volume=0
+
+fi
+
+# Do
+
+# Fiddle factor here - if brightness ends up 0, make it 1 instead.  Otherwise
+# you may as well just close the lid.
+echo "Brightness: $(dim $brightness)"
+echo "Volume: $(vol $volume)"

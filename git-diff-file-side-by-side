@@ -5,17 +5,15 @@
 #       * in HEAD (latest committed changes)
 
 function usage() {
-    scriptname=$1
-    cat <<HERE
+    cat <<-HERE
+    USAGE
 
-USAGE
+    $(basename $1) <file>
 
-$(basename $scriptname) <file>
+    Show a side-by-side diff of a particular file between the current versions:
 
-Show a side-by-side diff of a particular file between the current versions:
-
-    * on the file system (latest edited changes)
-    * in HEAD (latest committed changes)
+        * on the file system (latest edited changes)
+        * in HEAD (latest committed changes)
 
 HERE
 }

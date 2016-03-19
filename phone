@@ -1,0 +1,12 @@
+#!/usr/bin/env zscript
+#
+
+# dir=/var/run/user/1000/gvfs
+# 
+# if [[ -z $(ls $dir) ]]; then
+#     echo "dir is empty"
+# else
+#     phonedir=$(ls)
+# fi
+
+cd "/var/run/user/1000/gvfs/mtp:*/Internal Storage"

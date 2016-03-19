@@ -1,0 +1,13 @@
+#!/usr/bin/zsh
+#
+# Playing with zsh case statements
+#
+# Read up on this.  The terminators, for example, are kind of neat
+
+arg=$1
+
+case $arg
+
+    "one")
+        ;;
+

@@ -3,22 +3,24 @@
 # Print output as if someone was typing it.
 #
 #   * random short intervals between characters
-#   
+#
 #   I have no idea why this seems so neat to me.
-#   Try piping the output of w3m -dump to it.  
+#   Try piping the output of w3m -dump to it.  Or a man page.
 #
 #   -jdc 2013-06-20
 
 trap 'INT', 'SYSTEM_DEFAULT' # ^C exits.
 
-speed = ARGV.length > 0 ? ARGV[0].to_i : 3
+speed = ARGV.length > 0 ? ARGV[0].to_i : 2
+pause_factor = 4000
 lastchar = ''
 STDIN.read.split(//).each do |char|
 
     print char
+    next if char[/\s+/]
 
     # Normal delay
-    sleep (rand / speed) + 0.05
+    sleep(rand / speed + 0.05)
 
     # Occasional pauses between words
     if ( (char != ' ') and
@@ -27,9 +29,9 @@ STDIN.read.split(//).each do |char|
 
         # Sometimes the pause is long
         if (rand(5) == 0)
-            sleep 16 / speed
-        else 
-            sleep 4 / speed
+            sleep pause_factor**2 / speed
+        else
+            sleep pause_factor / speed
         end
 
     end

@@ -1,0 +1,5 @@
+#!/usr/bin/env zsh
+#
+#   Output brief info on the process currently using the most CPU
+
+top -bn 1 -o -'%CPU'  | tail -1 | awk '{ print $NF,$1,$9 }'

@@ -16,13 +16,12 @@ def fizznum_clear(n)
     return n
 end
 
-
 # ..dammit, Jonathan..
 (1..100).each do |n|
-    puts [  
-            [15,    "Fizzbuzz"], 
-            [3,         "Fizz"], 
-            [5,         "Buzz"], 
-            [n,              n] 
+    puts [
+            [15,    "Fizzbuzz"],
+            [3,         "Fizz"],
+            [5,         "Buzz"],
+            [n,              n]
     ].find { |x| n % x[0] == 0 }[1]
 end

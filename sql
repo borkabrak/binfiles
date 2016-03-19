@@ -9,7 +9,7 @@
 #       :!sql<cr>
 
 require 'pp'
-require_relative "/home/jcarter/bin/binfiles/SQLCmd.rb"
+require_relative "/home/jon/bin/SQLCmd.rb"
 
 
 # Saved bits of SQL

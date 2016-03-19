@@ -1,0 +1,27 @@
+#!/usr/bin/env zsh
+#
+#   Periodically take pictures with the webcam
+#
+#   P.S.  So it turns out, surprise, surprise, that the 'fswebcam' command
+#   itself supports options that provides all of the substantial functionality
+#   of this script.  And is almost certainly more robust.
+
+# Seconds between shots
+period=60
+if [[ $1 -gt 0 ]]; then
+    period=$1
+fi
+
+# Directory in which to store the photos
+output_directory=~/tmp/webcam/$(date)
+mkdir -p $output_location
+
+# How to name the photos (plus a timestamp suffix)
+name_prefix=$(basename $0-photo)
+
+# Log file
+logfile=/var/log/$(basename $0)/$(date -I).log
+
+echo "Storing shots in $output_location every $period seconds."
+echo "Logging normal output to $logfile"
+fswebcam ${output_location}/${name_prefix}-$(date -Iseconds) -l $period --log $logfile

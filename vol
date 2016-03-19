@@ -1,25 +1,47 @@
 #!/usr/bin/env zsh
 #
-# Intended to be a nicer cli interface to amixer, just for setting volume
+# Get/Set volume, reporting final volume as a percentage of max
 #
-#   USAGE:
+#   Outputs the final volume percentage and raises a desktop notification.
 #
-#     vol [<percentage>]
+#   USAGE EXAMPLES:
 #
-#   Example:
-#     
-#     vol 100 - set to max volume
+#   # Show current volume
+#   $ vol
 #
-#     vol 50 - set to half volume
+#   # Set volume to 50%
+#   $ vol 50%
 #
-#     vol - show current status of the master channel
+#   # Increase volume by twelve percent
+#   $ vol 12%+
 #
-#   TODO:
-#     Implement an unambiguous way of saying "set to this number, unless
-#     there's a +/- sign, in which case change volume by that much.
+#   # Decrease volume by nine decibles
+#   $ vol 9dB-
 
-if [[ -z $1 ]]; then
-  amixer get Master
-else
-  amixer set Master "$1"%
+# Set volume (if given a target)
+if [[ -n $1 ]]; then
+    amixer set Master $1 | grep -o '[0-9]\+%' > /dev/null
 fi
+
+# Get volume
+volume=$(amixer get Master | grep -o '[0-9]\+%' | grep -o '[0-9]*')
+
+# Select an icon based on volume level
+icon="audio-volume-high"
+if [[ $volume -le 66 ]]; then
+    icon="audio-volume-medium"
+fi
+if [[ $volume -le 33 ]]; then
+    icon="audio-volume-low"
+fi
+if [[ $volume -le 0  ]]; then
+    icon="audio-volume-muted"
+fi
+
+# Show volume..
+
+# on the console
+echo $volume
+
+# As a notification bubble
+#notify-send --expire-time 1000 -i $icon "$volume%"
