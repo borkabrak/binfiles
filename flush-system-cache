@@ -1,0 +1,14 @@
+#!/usr/bin/env zsh
+#
+#   Flush system caches, showing the differences before and after
+
+
+# Save the current memory state
+before=/var/tmp/$(basename $0)-before
+free > $before
+
+# Flush caches
+sudo sh -c 'sync && echo 3 > /proc/sys/vm/drop_caches'
+
+# Display memory state before and after
+pr -tm $before =(free) | pygmentize -g

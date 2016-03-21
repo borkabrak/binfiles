@@ -1,22 +1,33 @@
 #!/usr/bin/env zsh
 #
-#   zscript - Run scripts with this instead of 'zsh' (TODO: Can this be
-#   automated?) to wrap zsh code with some script-appropriate options and
-#   settings.
+#   zscript - Wrap zsh code in some options and settings more appropriate for
+#   running as scripts.
 #
-#   To use this, use this in the shebang line instead of the zsh executable.
-#   That is, make this the first line of the script file:
+#   Specify this file in the shebang line instead of the zsh executable:
 #
 #       #!/usr/bin/env zscript
 
 # Exit on the first nonzero return code
 setopt errexit
 
-# Provide the script with some useful script utilities
+# Make available some useful script utilities
 source ~/bin/zsh-utils
 
-# TODO: 
-#   * Make sure vim knows that it's still a zsh script, regardless of the shebang line
+# TODO:
+#  * Make sure vim recognizes 'zscript' in the shebang line the way it does 'zsh'.
+#
+#       (maybe start with :help ftplugin, to see how vim uses the shebang line to get filetype?)
+#
+#     In the meantime, adding a appropriate modeline to the script seems to work.  Like this:
+#       vim: ft=zsh
+#
+#  * How can I ensure that we don't use user-defined aliases, making sure the
+#  only options sent to the commands used by the scripts are the ones sent by
+#  the script itself?  Unalias everything?  Hm..
 
-# Finally, execute the script
-source $1
+# Adjust the argument list to what it would be if we ran the script normally.
+scriptfile=$1
+shift
+
+# Execute the script
+source $scriptfile

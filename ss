@@ -14,26 +14,28 @@
 #     TODO:
 #
 #     * new - start a new session, even if others exist
+#
+#     * Rewrite this with a Session class, or *something*.  Damn, look at this mess.  :)
 
 require 'open3'
 require 'erb'
 
-def old_show_sessions(sessions)
-# Format and display info on available sessions as reported by tmux
-  puts <<-END
-  Available tmux sessions:
-
-  * #{sessions.map {|s| sprintf("%-15s %40s", "[#{name(s)}]", s)}.join("\n  * ")}
-
-  Attach to one:
-    $ #{File.basename($PROGRAM_NAME)} [label]
-
-  Start a new session:
-    $ tmux
-
-  END
-  exit
-end
+# def old_show_sessions(sessions)
+# # Format and display info on available sessions as reported by tmux
+#   puts <<-END
+#   Available tmux sessions:
+# 
+#   * #{sessions.map {|s| sprintf("%-15s %40s", "[#{name(s)}]", s)}.join("\n  * ")}
+# 
+#   Attach to one:
+#     $ #{File.basename($PROGRAM_NAME)} [label]
+# 
+#   Start a new session:
+#     $ tmux
+# 
+#   END
+#   exit
+# end
 
 def show_sessions(sessions)
 # Format and display info on available sessions as reported by tmux
@@ -43,6 +45,7 @@ puts ERB.new(
   Available tmux sessions:
 
     #{ sessions.map {|s| sprintf("%-15s %40s", "[#{name(s)}]", s)}.join("\n  * ") }
+    
 
   Attach to a session by label:
 
@@ -51,9 +54,17 @@ puts ERB.new(
   No existing sessions are available
   <% end %>
 
+
+  List available sessions (show this help)
+
+    $ #{$0} list
+
+
   Start a new session:
 
     $ tmux
+
+
 """).result
 
 end
@@ -76,9 +87,12 @@ cmd = "tmux -2"
 sessions = get_sessions
 
 # Respond to any commands we're specifically watching for in this script.
-if ( ARGV[0] and ARGV[0] == "list" ) then
-    show_sessions(sessions)
-    exit
+if ( ARGV[0] ) then
+    case ARGV[0]
+    when "list"
+        show_sessions(sessions)
+        exit
+    end
 
 end
 

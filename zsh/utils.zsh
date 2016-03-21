@@ -44,7 +44,8 @@ function debug() {
 #}
 
 
-# Return 0 iff all the arguments are available commands.
+# Return 0 if all the arguments are available commands.  Otherwise, print an
+# error message.
 #
 # This is intended to be called from shell scripts, to confirm whether the
 # given commands exist, and to gracefully handle it when they do not.
@@ -68,8 +69,24 @@ function require() {
 
     # Notify of errors
     if [[ $#missing_dependencies > 0 ]]; then
-        print "$#missing_dependencies Required dependecies missing:\n\t$missing_dependencies"
+        print 1>&2 "$#missing_dependencies Required dependecies missing:\n\t$missing_dependencies"
         return $#missing_dependencies
     fi
 
+}
+
+# Run tests on functions in this script
+function self_tests() {
+
+}
+
+# Get input from a file specified in the argument list, or from STDIN, if
+# there's no appropriate argument.  Output is printed on STDOUT.
+function get_infile() {
+    # while read line
+    # do
+    #     echo "$line"
+    # done < "${1:-/dev/stdin}"
+
+    print "get_infile called"
 }

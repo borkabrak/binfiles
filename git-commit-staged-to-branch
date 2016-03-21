@@ -1,0 +1,44 @@
+#!/usr/bin/env zsh
+#
+#   Git helper to commit the CURRENTLY STAGED changes to a different branch.
+#
+#   TODO:
+#       * Prompt for missing options, confirmation, etc.  Generally, polish it up.
+
+function usage() {
+    cat <<-HERE
+
+    $1 <destination branch> [<commit message>]
+
+    <destination branch>
+        The branch to commit staged changes to.
+
+    <message>
+        The commit message.  If not given, an editor will be opened to provide
+        one. 
+
+HERE
+
+}
+# Check required args
+if [[ $# < 1 ]]; then
+    usage $(basename $0)
+    exit
+fi
+
+# Commit to destination branch
+print "Currently on branch: $current_branch"
+print "Checking out $1.."
+current_branch=$(git rev-parse --abbrev-ref HEAD)
+git checkout $1 || exit;
+
+print "Committing changes.."
+# Commit with/out a message
+# if [[ -n $2 ]]; then
+#     git commit -vm "$2"
+# else
+    git commit -ve
+# fi
+
+# Return to current branch
+git checkout $current_branch

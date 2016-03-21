@@ -1,2 +1,10 @@
-#!/usr/bin/env sh
-coffee -p $@
+#!/usr/bin/env zsh
+# Compile the given file (or stdin, if no file given) into coffeescript and
+# output the result.
+
+if [[ $# -lt 1 ]]; then
+    echo "no args.  STDIN:"
+    read
+else
+    coffee -p $@
+fi

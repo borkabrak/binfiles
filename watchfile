@@ -1,0 +1,14 @@
+#!/usr/bin/env zsh
+#
+# Use the inotify tools to execute a command whenever a file changes
+
+if [[ $# < 2 ]]; then
+    print "USAGE: $(basename $0) <file> command..."
+    exit
+fi
+
+file=$1
+shift
+command=$@
+
+print "Run `$command` whenever $file changes.."

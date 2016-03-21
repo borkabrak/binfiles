@@ -60,7 +60,7 @@ if [[ $1 == "grep" ]]; then
     exit
 fi
 
-entry="$(date +%r):$(pwd): $*" 
+entry="$(date +%r):$(pwd): $*"
 
 # Also add timestamp and working dir.
 echo $entry >> $jotfile

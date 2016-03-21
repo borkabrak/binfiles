@@ -17,7 +17,7 @@ previous_dimness=$(xbacklight -get)
 
 # Turn down the lights
 echo "Dimming screen to $dim%"
-xbacklight -set $dim 
+xbacklight -set $dim
 
 # Lock the door
 echo "Locking screen"
