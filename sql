@@ -9,7 +9,12 @@
 #       :!sql<cr>
 
 require 'pp'
-require_relative "/home/jon/bin/SQLCmd.rb"
+
+if `hostname`['NSU-DEV'] then
+    require_relative "/home/jcarter/bin/binfiles/SQLCmd.rb"
+else 
+    require_relative "/home/jon/bin/SQLCmd.rb"
+end
 
 
 # Saved bits of SQL
