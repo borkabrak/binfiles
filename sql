@@ -10,9 +10,24 @@
 #
 # TODO:
 #
-#   Store snippets in a file (YAML?)
+#
+#   - More robust error handling
+#       * Missing args
+#       * Malformed or missing YAML
+#
+#   - Run time options:
+#       * bare - output only SQL results (not header/footer stuff)
+#       * verbose - output sql command, info on snippet/subcmd
 
 require 'json'
+require 'yaml'
+
+##  CONFIGURATION OPTIONS  ##############################################################
+#
+# Read bits of precomposed SQL from a YAML file
+snippets_file = "/home/jcarter/.config/sql/snippets.yaml"
+#
+#########################################################################################
 
 if `hostname`['NSU-DEV'] then
     require_relative "/home/jcarter/bin/binfiles/SQLCmd.rb"
@@ -20,113 +35,7 @@ else
     require_relative "/home/jon/bin/SQLCmd.rb"
 end
 
-
-# Saved bits of SQL
-snippets = {
-
-    'test' => {
-        :description => 'Test basic functionality',
-        :args => nil,
-        :sql => "SELECT TOP(10) hID from hraHeaders"
-    },
-
-    'tables' => {
-        :description => 'List tables',
-        :args => nil,
-        :sql => "SELECT table_name FROM information_schema.tables WHERE TABLE_TYPE = 'BASE TABLE'"
-    },
-
-    'columns' => {
-
-        :description => 'List columns',
-        :sql => "
-        SELECT T.table_name + '.' + C.column_name as 'TABLE.COLUMN'
-
-            FROM INFORMATION_SCHEMA.TABLES T  
-                JOIN INFORMATION_SCHEMA.COLUMNS C on T.table_name = C.table_name
-
-            WHERE T.table_type = 'BASE TABLE'
-
-            ORDER BY T.table_name
-        "
-    },
-
-    'user-demo' => {
-
-        :description => "Get demographic information for a user",
-
-        :args => 'usrID',
-
-        :sql => "select
-            U.usrFN,
-            U.usrLN,
-            U.usrAddr,
-            U.usrAddr2,
-            U.usrCity,
-            U.usrState,
-            U.usrZip,
-            U.usrDOB,
-            U.usrGender,
-            U.usrSSN,
-            U.empID,
-            U.usrBestPhone,
-            U.usrEmail
-        from hraUsers U
-        where usrID = ?
-        "
-    },
-
-
-    'hwlp' => {
-
-        :description => "Show info on the Healthworks Landing Pages",
-
-        :args => nil,
-
-        :sql =>"
-            select 
-                * 
-            from CMSCustomTemplates T
-                join CMSCustomTemplates_ChannelPartners X on T.cmscptID = X.cmscptID
-        "
-
-    },
-
-    'customresources' => {
-
-        :description => 'show custom resources',
-
-        :args => nil,
-
-        :sql =>"
-            select P.cmspid, P.cmspNavName, M.cmsmid from cmspages P
-                join CMSPages_CMSModules M on P.cmspID = M.cmspID
-
-                where P.cmspNavName like '%resource%'
-        "
-
-        },
-
-    'user-custom-layout' => {
-
-        :description => 'Info about a user in custom layouts, by username',
-        :args => nil,
-        :sql => "
-            select 
-                U.usrID,
-                U.usrUsername,
-                U.usrFN + U.usrLN as 'Name',
-                CP.cpid 
-
-            from ChannelPartners CP
-                join Employers E on CP.cpID = E.cpID
-                join hraUsers U on E.empID = U.empID
-
-            where U.usrUsername = \'?\'
-        "
-    }
-}
-
+snippets = YAML.load(File.read(snippets_file))
 subcommands = {
     'help' => {
 

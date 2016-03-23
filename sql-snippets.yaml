@@ -1,0 +1,80 @@
+---
+test:
+  :description: Test basic functionality
+  :sql: SELECT TOP(10) hID from hraHeaders
+
+tables:
+  :description: List tables
+  :sql: SELECT table_name 
+        FROM information_schema.tables 
+        WHERE TABLE_TYPE = 'BASE TABLE'
+
+columns:
+  :description: List columns
+  :sql: SELECT 
+            T.table_name + '.' + C.column_name as 'TABLE.COLUMN' 
+            
+        FROM INFORMATION_SCHEMA.TABLES T 
+            JOIN INFORMATION_SCHEMA.COLUMNS C on T.table_name = C.table_name 
+
+        WHERE T.table_type = 'BASE TABLE' 
+        
+        ORDER BY T.table_name
+
+
+user-demo:
+  :description: Get demographic information for a user
+  :args: usrID
+  :sql: SELECT 
+            U.usrFN, 
+            U.usrLN, 
+            U.usrAddr, 
+            U.usrAddr2, 
+            U.usrCity, 
+            U.usrState, 
+            U.usrZip, 
+            U.usrDOB, 
+            U.usrGender, 
+            U.usrSSN, 
+            U.empID, 
+            U.usrBestPhone, 
+            U.usrEmail 
+
+        FROM hraUsers U 
+
+        WHERE usrID = ? 
+
+hwlp:
+  :description: Show info on the Healthworks Landing Pages
+  :sql: SELECT 
+            * 
+
+        FROM CMSCustomTemplates T 
+            JOIN CMSCustomTemplates_ChannelPartners X on T.cmscptID = X.cmscptID
+
+
+customresources:
+  :description: show custom resources
+  :sql: SELECT 
+            P.cmspid, 
+            P.cmspNavName, 
+            M.cmsmid 
+        
+        FROM CMSPages P 
+            JOIN CMSPages_CMSModules M on P.cmspID = M.cmspID 
+            
+        WHERE P.cmspNavName like '%resource%'
+
+user-custom-layout:
+  :description: Info about a user in custom layouts, by username
+  :sql: SELECT 
+            U.usrID, 
+            U.usrUsername, 
+            U.usrFN + U.usrLN as 'Name', 
+            CP.cpid 
+        
+        FROM ChannelPartners CP 
+            JOIN Employers E ON CP.cpID = E.cpID 
+            JOIN hraUsers U ON E.empID = U.empID 
+        
+        WHERE U.usrUsername = '?'
