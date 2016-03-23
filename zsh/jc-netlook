@@ -1,0 +1,14 @@
+#!/usr/bin/zsh
+#
+#   Run a few commands to get a picture of the local network environment
+#
+#   DEPENDENCIES
+#
+#   seq
+
+for n in $(seq 1 255); do
+    ip=192.168.1.$n
+    echo "Scanning $ip"
+    echo "\tping.."
+    ping -q -c4 -i0.2 $ip | grep --color error
+done

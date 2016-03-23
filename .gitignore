@@ -1,8 +1,9 @@
 # The subdirectories of 'bin' are where I develop various things, depending on
 # language.  These are more commonly in unstable states that I sometimes won't
 # ever care about again.
-#
-#   The 'bin' directory's direct children are all I'm really interested in tracking.
 
+#   The 'bin' directory's direct children are all I'm really interested in tracking.
 */*
-rdp
+
+# Exclude specifically the 'zsh' directory from the above 'ignore all subdirectories' rule.
+!zsh/*

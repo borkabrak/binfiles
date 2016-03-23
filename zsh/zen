@@ -1,0 +1,13 @@
+#!/usr/bin/env zsh
+#
+#    Simple GUI interface to command line tools.
+#
+#    Run a command line from the desktop, see the result
+#
+#    WIP.
+#
+notify=(notify-send --expire-time=1000 --icon=/usr/share/icons/gnome/scalable/emotes/face-laugh-symbolic.svg)
+subcommand=$(zenity --entry --text="Enter command")
+result=$(eval $subcommand)
+$notify $result
+

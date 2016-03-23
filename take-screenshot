@@ -1,0 +1,48 @@
+#!/usr/bin/env zsh
+#
+#   Record an image of the screen
+#
+#   USAGE: $0 <to> <from>
+#
+#   to - what to do with the image. (copy to clipboard, save as file..)
+#
+#   from - what to capture (entire screen, window..)
+
+# Having this in a script allows me to trigger it from another, or via
+# keymappings in the desktop manager.
+
+to=$1
+from=$2
+
+case $to in 
+
+    # Save to a file
+    file)
+        destination="--save ~/Pictures/screenshots/xfce4-screenshooter"
+    ;;
+
+    # Show the image via ImageMagick's 'display' command
+    display)
+        destination="--open display"
+    ;;
+
+    # Default - copy to the clipboard
+    *)
+        destination="--clipboard"
+    ;;
+
+esac
+
+case from in
+
+    window)
+        source="--window"
+    ;;
+
+    # Default - entire screen
+    *)
+        source="--fullscreen"
+    ;;
+esac
+
+echo xfce4-screenshooter $destination $source

@@ -1,0 +1,48 @@
+#!/usr/bin/env zsh
+#
+#  Playing around with the PARAMETER EXPANSION section of the zsh man pages
+#
+#  Examine what this script prints when run with and without a command-line argument.
+#
+#  NOTE: The ZSH docs seem to refer to variables as 'parameters'
+
+var=$1
+var2=$var
+cat <<ENDHERE
+
+Examples of playing around with zsh's parameter expansion.  More info at:
+
+    $ man zshexpn (search '^PARAMETER EXPANSION')
+
+
+NOTE: Where mention is made of a variable being 'undefined', what is meant is
+that the variable doesn't exist.  However, if the operator is preceded by a
+colon (as shown), this tells ZSH to treat Undefined as equivalent to Null
+(where the variable may be set, but to e.g., a zero-width string or some other
+'empty' value).
+
+For clarity(?), assume the following statements:
+var=\$1
+var2=$var
+
+..so you can see the difference between set and not set by passing any argument
+to this script.
+
+* '-'
+  Express a default value if a var is undefined
+    >>${var:-\$var is not set, so it gets this, the default value.}<<
+
+* '+'
+  Express *whether* a var is defined (returning var or 0).
+    >>${var:+\$var is set, although this is not its value.}<<
+
+* '='
+  Assign (and express) a default value if a var is undefined
+    >>${var2:=If \$var is not set, this becomes its value}<<
+
+* '?'
+
+    >>${var2:?If \$var2 is not set, print this and exit}<<
+
+Final line
+ENDHERE

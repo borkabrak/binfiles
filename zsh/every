@@ -1,0 +1,25 @@
+#!/usr/bin/env zsh
+#
+#   Run arbitrary code on every.. whatever
+#
+#   e.g.:
+#       $ every 'one two three' echo "The entity is $_"
+#
+#    Produces output:
+#       The entity is one
+#       The entity is two
+#       The entity is three
+#
+#   We could even have special handling of the first param (the one that
+#   determines the array to iterate over).  If it's a function, run it and
+#   expect it to return the proper array/space-delimited string.  Maybe a few
+#   hard-coded constants that this script understands.  Default to assuming a
+#   space-delimted string.
+
+# Determine what we're iterating over
+
+cmd=$1
+shift
+foreach thing in $@; do
+    echo "thing: '$thing'"
+done
