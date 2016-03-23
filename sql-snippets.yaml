@@ -3,11 +3,13 @@ test:
   :description: Test basic functionality
   :sql: SELECT TOP(10) hID from hraHeaders
 
+
 tables:
   :description: List tables
   :sql: SELECT table_name 
         FROM information_schema.tables 
         WHERE TABLE_TYPE = 'BASE TABLE'
+
 
 columns:
   :description: List columns
