@@ -1,0 +1,4 @@
+#!/usr/bin/env zscript
+# vim: ft=zsh
+
+get_infile
