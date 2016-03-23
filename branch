@@ -1,0 +1,19 @@
+#!/usr/bin/env zsh
+#
+#   print:
+#       * the first branch that matches the given pattern
+#       * if no pattern given, the current branch
+#       * if no match for the pattern, or not in a git repo, empty string
+
+
+if [[ $# > 0 ]]; then
+    retval=$( 2>&1 git branch | grep $1 | head -1 | sed 's/\s//g')
+
+else
+    retval=$( 2>&1 git symbolic-ref --short HEAD)
+
+fi
+
+if [[ ! $retval =~ "Not a git repo" ]]; then
+    print $retval
+fi

@@ -21,6 +21,12 @@ lines_to_display=5
 #   * Take a 'topic' and categorize by that.
 #
 #   * Pass an argument to search by
+#
+#   * Colorize output
+#
+#   * Allow output in markdown, maybe other formats
+
+autoload colors && colors
 
 jotdir="$HOME/jot";
 if [[ ! -d $jotdir ]]; then
