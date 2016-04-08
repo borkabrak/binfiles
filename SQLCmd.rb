@@ -72,7 +72,7 @@ class SQLCmd
         # utility.  Examine the result text of that command to detect errors from the DB.
         raise "Error running utility: $?" if (! $?.success?)
 
-        command_output.split(/\r?\n/)
+        command_output
 
     end
 
@@ -81,7 +81,7 @@ class SQLCmd
     end
 
     def to_s
-        self.result.join "\n"
+        self.result
     end
 
     # Validate commands

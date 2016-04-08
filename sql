@@ -43,25 +43,33 @@ subcommands = {
 
         'action' => lambda do
             puts "USAGE"
-            puts "#{$0} ['prod'] <subcommand|snippet|sql statement>"
             puts
-            puts "'prod' - use production database"
+            puts "\t#{$0} ['prod'] <subcommand|snippet|sql statement>"
+            puts
+            puts "\t'prod' - use production database"
+            puts
             puts
             puts "Subcommands"
             puts "==========="
+            puts
             subcommands.keys.sort.each do |k|
                 v = subcommands[k]
-                puts "#{k}: #{v["description"]}"
+                puts "\t#{k} - #{v["description"]}"
+                puts
             end
 
+            puts
             puts
 
             puts "Snippets"
             puts "========"
+            puts
             snippets.keys.sort.each do |k|
                 v = snippets[k]
-                puts "#{k}: #{v[:description]}"
+                puts "\t#{k}#{ " <#{v[:args]}>" if v[:args]} - #{v[:description]}"
+                puts
             end
+            puts
         end
     },
 
@@ -102,11 +110,9 @@ if ARGV.delete ARGV.find {|e| e.downcase == "prod" } then
     mode = "PROD"
 end
 
-# Used a subcommand?
+# Use a subcommand?
 if subcommands[ARGV[0]] then
-
     subcommands[ARGV[0]]["action"].call
-
     exit
 
 # Run a snippet?
@@ -114,12 +120,12 @@ elsif snippets[ARGV[0]] then
     command = snippets[ARGV[0]][:sql] 
     args = ARGV[1,] 
 
-# Need help?
+# No arguments - show usage and available subcommands/snippets
 elsif ARGV.length < 1 then
     subcommands["help"]["action"].call
     exit
 
-# Nope - run an explict command given as an argument
+# No special case - run an explict command given as an argument
 else
     command = ARGV[0]
 end
