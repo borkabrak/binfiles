@@ -1,0 +1,9 @@
+#!/usr/bin/env ruby
+#
+#   Show ting usage info
+
+require_relative "TingUsage.rb"
+
+usage = TingUsage.new(ARGV)
+
+puts usage

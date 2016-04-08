@@ -1,0 +1,7 @@
+#!/usr/bin/env zsh
+#
+#   less, in color, with line numbers
+
+# Redirect any input file onto STDIN. (So input can be from a pipe or file.) The script can then treat all input as from stdin.
+test "$1" && exec < "$1"
+grep -n '.*' --color=always | less -R

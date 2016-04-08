@@ -1,0 +1,26 @@
+#!/usr/bin/env python
+#Sample code to read in test cases:
+
+import sys
+test_cases = open(sys.argv[1], 'r')
+for test in test_cases:
+    # ignore test if it is an empty line
+    # 'test' represents the test case, do something with it
+    # ...
+    # ...
+    test = test.strip()
+    X, Y, N = (int(s) for s in test.split())
+    result = ""
+    for i in range(1, N+1):
+        if i % X == 0 and i % Y == 0:
+            result += "FB "
+        elif i % X == 0:
+            result += "F "
+        elif i % Y == 0:
+            result += "B "
+        else:
+            result += str(i) + " "
+
+    print (result.strip())
+
+test_cases.close()

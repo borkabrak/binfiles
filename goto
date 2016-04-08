@@ -1,0 +1,7 @@
+#!/usr/bin/env zsh
+#
+#   Change the current directory to that of the first file `locate`d that
+#   matches the pattern.
+
+file=$1 | read
+echo $file

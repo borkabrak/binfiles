@@ -1,0 +1,21 @@
+#!/usr/bin/env ruby
+
+require 'sinatra'
+require 'net/http'
+
+baseurl = "http://nextbus.jt2k.com/api"
+
+def show(template)
+    @template = template
+    erb :index
+end
+
+get '/' do
+    "App running"
+end
+
+get '/routes/:routenumber' do
+    @msg = "Route: #{params['routenumber']}"
+    @routes = Net::HTTP.get(URI("#{baseurl}/api/route/#{params['routenumber']}"))
+    show :routes
+end

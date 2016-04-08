@@ -1,0 +1,35 @@
+#!/usr/bin/env zsh
+#
+#   Describe USB ports and current devices
+
+usbdir="/sys/bus/usb/devices"
+
+autoload colors && colors
+# Show abbreviated lsusb output
+# lsusb | sort -n --key=2,4 | cut --delimiter=' ' --fields=1,2,3,4,7-
+
+print "Buses:"
+
+# Fetch bus numbers from lsusb output - get each unique bus number, stripping leading zeroes
+buses=($(lsusb | cut -f2 -d' ' | sort -u | sed 's/^0*//'))
+for busnum in $buses; do
+
+    # Determine USB level (2.0 or 3.0)
+    #   NOTE:  This seems to contradict `lsusb`, on port 3.  lsusb says USB2.0, but this file says xHCI..
+    hci_type=$(grep -o '.HCI' $usbdir/usb$busnum/product)
+    if [[ $hci_type == 'xHCI' ]]; then
+        usb_level='3.0'
+    elif [[ $hci_type == 'EHCI' ]]; then
+        usb_level='2.0'
+    else
+        usb_level='Unknown (1.0?)'
+    fi
+    
+    # Output description of current port
+    cat <<-HERE | sed 's/^    //'
+    Bus: $busnum
+    USB Type: $usb_level
+
+HERE
+
+done

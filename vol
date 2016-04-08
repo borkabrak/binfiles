@@ -20,6 +20,7 @@
 
 # Set volume (if given a target)
 if [[ -n $1 ]]; then
+
     amixer set Master $1 | grep -o '[0-9]\+%' > /dev/null
 fi
 

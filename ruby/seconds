@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+#
+#   Convert seconds to larger time units.  Or vice versa.
+#
+
+class Duration
+
+    def initialize(timespec)
+        @timespec = timespec
+    end
+
+end

@@ -5,32 +5,68 @@
 #   The defaults are hardcoded right now, but maybe we can be smarter.  Maybe
 #   if a given setting is at max, put it at min, and vice versa.
 
-function report() {
-    echo "brightness: $brightness"
-    echo "volume: $volume"
-}
 
+#####################
+## CONFIG SETTINGS ##
+#####################
+# Define presets - single-word arguments that imply both brightness and volume
+presetnames=" bus bed "
+typeset -A presets
+presets=(
+    bus "100 0"
+    bed "5 20"
+)
 
+#########################
+# Determine parameters ##
+#########################
 if [[ $# > 1 ]]; then
-    # Use the args for brightness and volume respectively
+    # Multiple arguments. Use the first two for brightness and volume
     brightness=$1
     volume=$2;
 
 elif [[ $# > 0 ]]; then 
-    # Just one arg - use it for both
-    brightness=$1
-    volume=$brightness
+
+    # Single argument - is it a preset?
+
+    if [[ $presetnames =~ " $1 " ]]; then
+        # Argument is a valid preset - set values
+        print "preset triggered: $1"
+        brightness=$(print $presets[$1] | awk '{print $1}')
+        volume=$(print $presets[$1] | awk '{print $2}')
+
+    else
+        # Single argument, but it doesn't match a known preset key - use it for both vals
+        brightness=$1
+        volume=$brightness
+
+    fi
 
 else
-    # No arguments.  Default both.
+    # No arguments.  Use defaults for both.
     brightness=100
     volume=0
 
 fi
 
-# Do
+##################
+# Apply changes ##
+##################
+if [[ "${brightness}${volume}" =~ "^\d+$" ]]; then
+    # Both settings are numeric, and therefore sensible(?).  Apply them.
 
-# Fiddle factor here - if brightness ends up 0, make it 1 instead.  Otherwise
-# you may as well just close the lid.
-echo "Brightness: $(dim $brightness)"
-echo "Volume: $(vol $volume)"
+    # Fiddle factor here - enforce a minimum brightness, or you may as well just close the lid.
+    if [[ $brightness < 5 ]]; then
+        brightness=5
+    fi
+
+    print "Brightness: $(dim $brightness)"
+    print "Volume: $(vol $volume)"
+else
+    # non-numeric vals
+    print "Invalid arguments:'$@'"
+    print "Brightness:$brightness\nVolume:$volume"
+    print "Concat: ${brightness}${volume}"
+    exit
+fi
+

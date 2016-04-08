@@ -3,7 +3,7 @@
 # ever care about again.
 
 #   The 'bin' directory's direct children are all I'm really interested in tracking.
-*/*
+#*/*
 
 # Exclude specifically the 'zsh' directory from the above 'ignore all subdirectories' rule.
-!zsh/*
+#!zsh/*

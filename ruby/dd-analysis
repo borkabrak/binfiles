@@ -1,0 +1,27 @@
+#!/usr/bin/env ruby
+class Character
+    attr_accessor :name, :level, :hp, :mp
+
+    def initialize(options)
+        @name = options.name || "Steve?"
+        @level = options.level || 1
+        @hp = options.hp || 10
+        @mp = options.mp || 10
+    end
+
+    def show
+        puts "#{@name}: L#{@level} HP:#{@hp}/MP:#{@mp}"
+    end
+
+    def btp
+        @mp += 3
+        @hp -= (3*@level)
+    end
+
+    def heal
+        @mp -= 5
+        @hp += (4*@level)
+    end
+end
+
+

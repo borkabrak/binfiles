@@ -1,0 +1,49 @@
+I don't code a lot of C.  Might be fun to implement tiny exercise programs for
+each feature needed until I can build a rudimentary shell.  My own shell might
+be fun.  I might even have a couple of ideas for useful features not present
+in other shells.  For example:
+
+Pattern matching to decide what command to run.
+The idea is that, say I run the command 'll'.  Sometimes, this is aliased to
+'ls -l'.  In such cases, there are often also alias for 'ld', 'la', etc, using
+the various options to ls.  So good so far.  But if there is no alias, or
+command, or anything else in the path, you just get an error.
+
+IDEAS:
+======
+
+* What if, instead, the last directory in $PATH contained an executable file
+named 'l\*' that got run for any command beginning with 'l' that didn't match
+anything else?  You could have it build the proper form of ls based on how it
+was invoked, allowing you to decide on the fly that you want to run 'ls1ad',
+without having to alias every possible permutation of the many options ls
+takes, or if you did, having to remember the order.  At a certain point, that
+becomes ridiculous, but it might be good to have a shell that is smart enough
+to just think 'I've tried, and there's not a command that matches this.  But
+there is a command that, if interpreted as a pattern, does match this.  I'll
+run that instead.'  It may be better to, instead of putting these so they are
+seen at the end of the $PATH, to have a special 'pattern alias' setting that
+creates them instead.
+
+NOTE: ZSH does What You Mean if you run:
+
+    # Show commands that begin with 'z'
+    $ which z*
+
+NOTE: Also do $ man zshall/suffix alias
+
+Maybe this can be used to implement something like the above in ZSH?
+
+* Always be able to access the output of the last command without running it
+  again.  This could be especially useful for commands that take a long time,
+  or that use a lot of bandwidth you might not want to repeat just to review
+  the output.
+
+  This can be done in current shells by reviewing the scrollback in whatever
+  terminal emulator you're using.  But it seems more useful to have a file in
+  /tmp or somewhere that is guaranteed to contain the last output.  Maybe
+  /var/log/<shell> or something..
+
+Maybe I don't have to write an entire shell in C.  Maybe I could use whatever
+scripting language I want to write a wrapper around zsh, just to add whatever
+features I like.

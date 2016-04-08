@@ -1,0 +1,26 @@
+#!/usr/bin/env ruby
+#
+#   Practice using rack
+
+require 'rack'
+
+# To use Rack, provide an "app": an object that responds to the call method,
+# taking the environment hash as a parameter, and returning an Array with three
+# elements:
+#
+# * The HTTP response code
+# * A Hash of headers
+# * The response body, which must respond to each
+
+body = <<-END
+    Thou great first cause, least understood
+    Who all my sense confined
+    To know but this, that thou art good
+    And I myself am blind
+END
+
+app = Proc.new do |env|
+    ['200', {'Content-Type' => 'text/html'}, body.split("\n") ]
+end
+ 
+Rack::Handler::WEBrick.run app

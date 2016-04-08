@@ -1,0 +1,18 @@
+#!/usr/bin/env ruby
+#
+#   Just messing around with anonymous functions
+
+# Map strings to functions to run
+
+map = {
+    "bare" =>  lambda {|args| puts "bare func called" },
+    "new" => lambda {|args| puts "New called with name:#{args[0]}" }
+}
+
+command = ARGV[0]
+params = ["Bob", "Fred"]
+
+puts "Running command:#{command}:"
+puts "params: #{params}"
+
+map[command].call(params)
